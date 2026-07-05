@@ -46,7 +46,9 @@ jobs:
           context: ./cisco-vision-snmp2mqtt
           platforms: ${{ matrix.platform }}
           push: true
-          tags: ghcr.io/zemerdon/cisco-vision-snmp2mqtt-addon:${{ matrix.arch }}-0.5.0-alpha1
+          tags: |
+            ghcr.io/zemerdon/cisco-vision-snmp2mqtt-addon:${{ matrix.arch }}-0.5.0-alpha1
+            ghcr.io/zemerdon/cisco-vision-snmp2mqtt-addon:0.5.0-alpha1
           build-args: |
             BUILD_FROM=ghcr.io/home-assistant/${{ matrix.arch }}-base:latest
             BUILD_ARCH=${{ matrix.arch }}
