@@ -1,0 +1,83 @@
+ARG BUILD_FROM=ghcr.io/home-assistant/base:latest
+
+### Build snmp2mqtt
+FROM node:lts-alpine3.22 AS builder
+
+# Packages
+RUN \
+  apk add --no-cache --virtual .build-dependencies \
+    git \
+    python3 \
+    make \
+    g++
+
+WORKDIR /app
+
+# Clone
+ARG SOURCE_REPO=zemerdon
+ARG CACHE_BUST=stable-object-id-1
+
+RUN echo "Cache bust: ${CACHE_BUST}" \
+ && git clone --branch main --single-branch https://github.com/${SOURCE_REPO}/switch-vision-snmp2mqtt.git /tmp/snmp2mqtt \
+ && mkdir -p /app/src \
+ && cp /tmp/snmp2mqtt/package.json /app \
+ && cp /tmp/snmp2mqtt/yarn.lock /app \
+ && cp /tmp/snmp2mqtt/tsconfig.json /app \
+ && cp -r /tmp/snmp2mqtt/src/* /app/src
+
+# Build
+RUN yarn install --frozen-lockfile
+RUN yarn build
+
+RUN mv /app/node_modules /app/node_modules_dev
+RUN yarn install --frozen-lockfile --production
+
+### App
+FROM $BUILD_FROM
+STOPSIGNAL SIGINT
+
+# Packages
+RUN \
+  apk add --no-cache --virtual .build-dependencies \
+    yq nodejs npm
+
+# Build arguments
+ARG BUILD_ARCH
+ARG BUILD_DATE
+ARG BUILD_DESCRIPTION
+ARG BUILD_NAME
+ARG BUILD_REF
+ARG BUILD_REPOSITORY
+ARG BUILD_VERSION
+
+# Add Label
+LABEL \
+    io.hass.name="${BUILD_NAME}" \
+    io.hass.description="${BUILD_DESCRIPTION}" \
+    io.hass.arch="${BUILD_ARCH}" \
+    io.hass.type="app" \
+    io.hass.version=${BUILD_VERSION} \
+    maintainer="Andrew J.Swan <andrewjswan@addons.community>" \
+    org.opencontainers.image.title="${BUILD_NAME}" \
+    org.opencontainers.image.description="${BUILD_DESCRIPTION}" \
+    org.opencontainers.image.vendor="Andrew J.Swan" \
+    org.opencontainers.image.authors="Andrew J.Swan <andrewjswan@addons.community>" \
+    org.opencontainers.image.licenses="MIT" \
+    org.opencontainers.image.created=${BUILD_DATE} \
+    org.opencontainers.image.revision=${BUILD_REF} \
+    org.opencontainers.image.version=${BUILD_VERSION} \
+    org.opencontainers.image.source="https://github.com/${BUILD_REPOSITORY}" \
+    org.opencontainers.image.documentation="https://github.com/${BUILD_REPOSITORY}/blob/main/README.md"
+
+# Copy data for app
+COPY run.sh /
+RUN chmod a+x /run.sh
+
+# Start snmp2mqtt
+WORKDIR /app
+
+COPY --from=builder /app/node_modules /app/node_modules
+COPY --from=builder /app/dist /app/dist
+COPY --from=builder /app/package.json /app/package.json
+
+CMD [ "/run.sh" ]
