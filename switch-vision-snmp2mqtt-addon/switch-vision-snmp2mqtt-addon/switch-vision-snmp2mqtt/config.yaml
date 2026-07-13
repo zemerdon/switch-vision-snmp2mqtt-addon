@@ -1,6 +1,6 @@
 ---
 name: Switch Vision SNMP2MQTT
-version: 0.9.2
+version: 0.9.0
 slug: switch_vision_snmp2mqtt
 description: Switch Vision SNMP to MQTT bridge with Discovery generated YAML import support
 url: https://github.com/zemerdon/switch-vision-snmp2mqtt
