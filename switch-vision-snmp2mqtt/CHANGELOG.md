@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.4
+
+- Make Switch Vision Discovery generated YAML the fresh-install default.
+- Load `/share/switch_vision/generated-snmp2mqtt.yaml` automatically when the add-on starts.
+- Log the imported generated-YAML path, target count, sensor count, and SHA-256.
+- Preserve existing user options during add-on upgrades; the new default applies to fresh installs or reset options.
+- Improve the warning shown when generated import is deliberately disabled.
+
 ## 0.9.0
 
 - Rename the add-on to Switch Vision SNMP2MQTT.

@@ -102,6 +102,15 @@ if bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}"; then
     bashio::exit.nok
   fi
 
+  GENERATED_TARGET_COUNT="$(grep -Ec '^[[:space:]]*-[[:space:]]+host:[[:space:]]+[^[:space:]]+' "${SWITCH_VISION_GENERATED_YAML_PATH}" || true)"
+  GENERATED_SENSOR_COUNT="$(grep -Ec '^[[:space:]]*-[[:space:]]+oid:[[:space:]]+' "${SWITCH_VISION_GENERATED_YAML_PATH}" || true)"
+  GENERATED_SHA256="$(sha256sum "${SWITCH_VISION_GENERATED_YAML_PATH}" | awk '{print $1}')"
+
+  bashio::log.info 'Switch Vision generated YAML validated.'
+  bashio::log.info "Generated targets: ${GENERATED_TARGET_COUNT}"
+  bashio::log.info "Generated sensors: ${GENERATED_SENSOR_COUNT}"
+  bashio::log.info "Generated YAML SHA-256: ${GENERATED_SHA256}"
+
   mkdir -p "$(dirname "${IMPORTED_TARGETS_PATH}")"
 
   if bashio::var.true "${BACKUP_EXISTING_CONFIG}" && [ -f "${TARGET_PATH}" ]; then
@@ -119,7 +128,7 @@ if bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}"; then
   bashio::log.info 'Switch Vision generated YAML validated and imported to:'
   bashio::log.blue "                  ${TARGET_PATH}"
 else
-  bashio::log.info 'Switch Vision generated YAML import is disabled.'
+  bashio::log.warning 'Switch Vision generated YAML import is disabled; using the manually configured targets file.'
 fi
 
 if [ ! -f "${TARGET_PATH}" ]; then
