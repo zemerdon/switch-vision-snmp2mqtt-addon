@@ -10,7 +10,7 @@ Switch Vision Discovery generates:
 /share/switch_vision/generated-snmp2mqtt.yaml
 ```
 
-Enable import with:
+Fresh installations use this generated file by default:
 
 ```yaml
 use_switch_vision_generated_yaml: true
@@ -18,7 +18,7 @@ switch_vision_generated_yaml_path: /share/switch_vision/generated-snmp2mqtt.yaml
 imported_targets_path: /config/addons_config/switch_vision_snmp2mqtt/imported/generated-snmp2mqtt.yaml
 ```
 
-The add-on requires these generated-file markers:
+At startup, the add-on validates and imports that file, then logs the source path, target count, sensor count, and SHA-256. The add-on requires these generated-file markers:
 
 ```yaml
 # Switch Vision generated SNMP2MQTT YAML
@@ -27,9 +27,9 @@ The add-on requires these generated-file markers:
 
 It also rejects missing files, `CHANGE_ME` placeholders, missing `targets:` blocks, and files without target host entries.
 
-## Normal targets file
+## Manual targets file
 
-When generated import is disabled, the default targets path is:
+Existing users can disable generated import and use the manual targets path:
 
 ```text
 /config/addons_config/switch_vision_snmp2mqtt/targets.yaml
