@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.5
+
+- Enable Home Assistant MQTT Discovery by default for fresh installations.
+- Keep existing saved add-on options unchanged during upgrades.
+- Derive the GHCR image tag and build metadata from `config.yaml` instead of hard-coding the version.
+- Force each image build to fetch the current Switch Vision SNMP2MQTT core source.
+
 ## 0.9.4
 
 - Make Switch Vision Discovery generated YAML the fresh-install default.
