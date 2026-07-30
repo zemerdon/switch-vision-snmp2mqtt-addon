@@ -19,6 +19,19 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Read add-on metadata
+        id: metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="$(awk '$1 == "version:" {gsub(/"/, "", $2); print $2; exit}' switch-vision-snmp2mqtt/config.yaml)"
+          if [[ -z "${version}" ]]; then
+            echo "Unable to read version from config.yaml" >&2
+            exit 1
+          fi
+          echo "version=${version}" >> "$GITHUB_OUTPUT"
+          echo "build_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
 
@@ -39,12 +52,13 @@ jobs:
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:0.9.4
+            ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:${{ steps.metadata.outputs.version }}
             ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:latest
           build-args: |
-            BUILD_VERSION=0.9.4
+            BUILD_VERSION=${{ steps.metadata.outputs.version }}
             BUILD_NAME=Switch Vision SNMP2MQTT
             BUILD_DESCRIPTION=Switch Vision SNMP to MQTT bridge for Home Assistant
             BUILD_REPOSITORY=zemerdon/switch-vision-snmp2mqtt-addon
             BUILD_REF=${{ github.sha }}
-            BUILD_DATE=${{ github.event.head_commit.timestamp }}
+            BUILD_DATE=${{ steps.metadata.outputs.build_date }}
+            CACHE_BUST=${{ github.run_id }}-${{ github.run_attempt }}
