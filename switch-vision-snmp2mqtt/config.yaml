@@ -1,51 +1,40 @@
 ---
 name: Switch Vision SNMP2MQTT
-version: 0.9.5
+version: 0.9.6
 slug: switch_vision_snmp2mqtt
-description: Switch Vision SNMP to MQTT bridge with Discovery generated YAML import support
+description: Switch Vision SNMP to MQTT bridge with Discovery generated YAML import
+  and Juniper EX VLAN/trunk support
 url: https://github.com/zemerdon/switch-vision-snmp2mqtt
-
 arch:
-  - amd64
-  - aarch64
-
+- amd64
+- aarch64
 image: ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon
-
 startup: application
 boot: auto
 init: false
-
 map:
-  - addons:rw
-  - all_addon_configs:rw
-  - config:rw
-  - share:rw
-  - ssl:rw
-
+- local_apps:rw
+- all_app_configs:rw
+- config:rw
+- share:rw
+- ssl:rw
 services:
-  - mqtt:need
-
+- mqtt:need
 homeassistant: 2026.7.1
-
 panel_icon: mdi:cog-transfer-outline
 panel_title: Switch Vision SNMP2MQTT
-
 options:
   mqtt:
-    host: "localhost"
+    host: localhost
     port: 1883
-
-  targets_path: "/config/addons_config/switch_vision_snmp2mqtt/targets.yaml"
-
+  targets_path: /config/app_configs/switch_vision_snmp2mqtt/targets.yaml
   use_switch_vision_generated_yaml: true
-  switch_vision_generated_yaml_path: "/share/switch_vision/generated-snmp2mqtt.yaml"
-  imported_targets_path: "/config/addons_config/switch_vision_snmp2mqtt/imported/generated-snmp2mqtt.yaml"
+  switch_vision_generated_yaml_path: /share/switch_vision/generated-snmp2mqtt.yaml
+  imported_targets_path: /config/app_configs/switch_vision_snmp2mqtt/imported/generated-snmp2mqtt.yaml
   backup_existing_config: true
-
   homeassistant:
     discovery: true
-    prefix: "homeassistant"
-
+    prefix: homeassistant
 schema:
   mqtt:
     host: str?
@@ -63,16 +52,12 @@ schema:
     cert: str?
     key: str?
     reject_unauthorized: bool?
-
   targets_path: str
-
   use_switch_vision_generated_yaml: bool
   switch_vision_generated_yaml_path: str
   imported_targets_path: str
   backup_existing_config: bool
-
   homeassistant:
     discovery: bool?
     prefix: str?
-
   log: list(debug|info|warning|error)?

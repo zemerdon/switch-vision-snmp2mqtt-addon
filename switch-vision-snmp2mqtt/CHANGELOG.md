@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.6
+
+- Pin the container build to Switch Vision SNMP2MQTT core tag `v0.9.6`.
+- Add Juniper EX VLAN and trunk discovery support from the updated core.
+- Use `local_apps` and `all_app_configs` Home Assistant OS mappings.
+- Move app configuration paths to `/config/app_configs/switch_vision_snmp2mqtt/`.
+- Remove active legacy add-on mappings and legacy configuration-path fallbacks.
+- Preserve the Switch Vision Discovery generated-YAML import workflow.
+
 ## 0.9.5
 
 - Enable Home Assistant MQTT Discovery by default for fresh installations.

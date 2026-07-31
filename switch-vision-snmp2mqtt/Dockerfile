@@ -15,10 +15,11 @@ WORKDIR /app
 
 # Clone
 ARG SOURCE_REPO=zemerdon
-ARG CACHE_BUST=stable-object-id-1
+ARG CORE_VERSION=v0.9.6
+ARG CACHE_BUST=core-v0.9.6
 
 RUN echo "Cache bust: ${CACHE_BUST}" \
- && git clone --branch main --single-branch https://github.com/${SOURCE_REPO}/switch-vision-snmp2mqtt.git /tmp/snmp2mqtt \
+ && git clone --branch "${CORE_VERSION}" --single-branch https://github.com/${SOURCE_REPO}/switch-vision-snmp2mqtt.git /tmp/snmp2mqtt \
  && mkdir -p /app/src \
  && cp /tmp/snmp2mqtt/package.json /app \
  && cp /tmp/snmp2mqtt/yarn.lock /app \
