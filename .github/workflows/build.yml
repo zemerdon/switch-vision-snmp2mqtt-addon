@@ -19,7 +19,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Read add-on metadata
+      - name: Read app metadata
         id: metadata
         shell: bash
         run: |
@@ -61,4 +61,5 @@ jobs:
             BUILD_REPOSITORY=zemerdon/switch-vision-snmp2mqtt-addon
             BUILD_REF=${{ github.sha }}
             BUILD_DATE=${{ steps.metadata.outputs.build_date }}
-            CACHE_BUST=${{ github.run_id }}-${{ github.run_attempt }}
+            CORE_VERSION=v0.9.6
+            CACHE_BUST=core-v0.9.6-${{ github.run_id }}-${{ github.run_attempt }}

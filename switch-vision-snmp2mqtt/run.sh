@@ -43,7 +43,7 @@ IMPORTED_TARGETS_PATH="$(bashio::config 'imported_targets_path')"
 BACKUP_EXISTING_CONFIG="$(bashio::config 'backup_existing_config')"
 
 if [ -z "${TARGET_PATH}" ]; then
-  TARGET_PATH="/config/addons_config/switch_vision_snmp2mqtt/targets.yaml"
+  TARGET_PATH="/config/app_configs/switch_vision_snmp2mqtt/targets.yaml"
   bashio::log.notice 'Switch to default file with Targets:'
   bashio::log.notice " ${TARGET_PATH}"
 fi
@@ -53,7 +53,7 @@ if [ -z "${SWITCH_VISION_GENERATED_YAML_PATH}" ]; then
 fi
 
 if [ -z "${IMPORTED_TARGETS_PATH}" ]; then
-  IMPORTED_TARGETS_PATH="/config/addons_config/switch_vision_snmp2mqtt/imported/generated-snmp2mqtt.yaml"
+  IMPORTED_TARGETS_PATH="/config/app_configs/switch_vision_snmp2mqtt/imported/generated-snmp2mqtt.yaml"
 fi
 
 validate_switch_vision_generated_yaml() {
@@ -114,7 +114,7 @@ if bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}"; then
   mkdir -p "$(dirname "${IMPORTED_TARGETS_PATH}")"
 
   if bashio::var.true "${BACKUP_EXISTING_CONFIG}" && [ -f "${TARGET_PATH}" ]; then
-    BACKUP_DIR="/config/addons_config/switch_vision_snmp2mqtt/backups"
+    BACKUP_DIR="/config/app_configs/switch_vision_snmp2mqtt/backups"
     BACKUP_FILE="${BACKUP_DIR}/targets-$(date -u +%Y%m%dT%H%M%SZ).yaml"
     mkdir -p "${BACKUP_DIR}"
     cp "${TARGET_PATH}" "${BACKUP_FILE}"
