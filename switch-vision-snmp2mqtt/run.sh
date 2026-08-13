@@ -141,11 +141,65 @@ if [ ! -f "${TARGET_PATH}" ]; then
   bashio::exit.nok
 fi
 
+# Resolve Home Assistant's MQTT service for fresh/default installations.
+# Explicit custom broker hosts remain untouched. v0.9.6 installations that
+# still contain the old localhost default are migrated at runtime without
+# rewriting the user's saved Supervisor options.
+MQTT_CONFIG_HOST="$(bashio::config 'mqtt.host' 2>/dev/null || true)"
+MQTT_CONFIG_PORT="$(bashio::config 'mqtt.port' 2>/dev/null || true)"
+MQTT_CONFIG_USERNAME="$(bashio::config 'mqtt.username' 2>/dev/null || true)"
+MQTT_CONFIG_PASSWORD="$(bashio::config 'mqtt.password' 2>/dev/null || true)"
+
+# Bashio may render an absent optional value as the literal string "null".
+# Normalize that to empty before deciding whether Supervisor service values
+# should be used.
+[ "${MQTT_CONFIG_HOST}" = "null" ] && MQTT_CONFIG_HOST=""
+[ "${MQTT_CONFIG_PORT}" = "null" ] && MQTT_CONFIG_PORT=""
+[ "${MQTT_CONFIG_USERNAME}" = "null" ] && MQTT_CONFIG_USERNAME=""
+[ "${MQTT_CONFIG_PASSWORD}" = "null" ] && MQTT_CONFIG_PASSWORD=""
+
+USE_SUPERVISOR_MQTT=false
+case "${MQTT_CONFIG_HOST}" in
+  ""|localhost|127.0.0.1|core-mosquitto)
+    USE_SUPERVISOR_MQTT=true
+    ;;
+esac
+
+if [ "${USE_SUPERVISOR_MQTT}" = "true" ]; then
+  SERVICE_MQTT_HOST="$(bashio::services mqtt 'host' 2>/dev/null || true)"
+  SERVICE_MQTT_PORT="$(bashio::services mqtt 'port' 2>/dev/null || true)"
+  SERVICE_MQTT_USERNAME="$(bashio::services mqtt 'username' 2>/dev/null || true)"
+  SERVICE_MQTT_PASSWORD="$(bashio::services mqtt 'password' 2>/dev/null || true)"
+
+  if [ -z "${SERVICE_MQTT_HOST}" ]; then
+    bashio::log.fatal 'Home Assistant MQTT service is required but no MQTT service host was returned by Supervisor.'
+    bashio::exit.nok
+  fi
+
+  SV_MQTT_HOST="${SERVICE_MQTT_HOST}"
+  SV_MQTT_PORT="${SERVICE_MQTT_PORT:-1883}"
+  SV_MQTT_USERNAME="${SERVICE_MQTT_USERNAME}"
+  SV_MQTT_PASSWORD="${SERVICE_MQTT_PASSWORD}"
+  bashio::log.info 'Using Home Assistant Supervisor MQTT service.'
+else
+  SV_MQTT_HOST="${MQTT_CONFIG_HOST}"
+  SV_MQTT_PORT="${MQTT_CONFIG_PORT:-1883}"
+  SV_MQTT_USERNAME="${MQTT_CONFIG_USERNAME}"
+  SV_MQTT_PASSWORD="${MQTT_CONFIG_PASSWORD}"
+  bashio::log.info 'Using explicitly configured MQTT broker.'
+fi
+
+export SV_MQTT_HOST SV_MQTT_PORT SV_MQTT_USERNAME SV_MQTT_PASSWORD
+
 bashio::log.info 'SNMP2MQTT Starting...'
 
 bashio::log.info 'Prepare config...'
 yq -p json -o yaml \
-  'del(.targets_path, .use_switch_vision_generated_yaml, .switch_vision_generated_yaml_path, .imported_targets_path, .backup_existing_config)' \
+  'del(.targets_path, .use_switch_vision_generated_yaml, .switch_vision_generated_yaml_path, .imported_targets_path, .backup_existing_config)
+   | .mqtt.host = strenv(SV_MQTT_HOST)
+   | .mqtt.port = (strenv(SV_MQTT_PORT) | tonumber)
+   | .mqtt.username = strenv(SV_MQTT_USERNAME)
+   | .mqtt.password = strenv(SV_MQTT_PASSWORD)' \
   "${CONFIG_PATH}" > /app/config.yml
 cat "${TARGET_PATH}" >> /app/config.yml
 
@@ -159,10 +213,6 @@ bashio::log.info
 
 # ==============================================================================
 bashio::color.blue
-node /app/dist/index.js
-bashio::color.reset
-
-# ==============================================================================
-bashio::log.info
-bashio::log.info 'SNMP2MQTT Stop'
-bashio::exit.ok
+# Replace the wrapper process so Supervisor receives the core's exact exit
+# status and stop signals are delivered directly to SNMP2MQTT.
+exec node /app/dist/index.js

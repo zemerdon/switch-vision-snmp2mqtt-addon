@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.7
+
+- Resolve the Home Assistant Supervisor MQTT service automatically for fresh installs and migrated `localhost` defaults.
+- Preserve explicit custom MQTT broker hosts and credentials.
+- Pass Supervisor MQTT host, port, username and password into the generated runtime configuration without logging secrets.
+- Replace the shell wrapper with the Node process so fatal core exits and stop signals propagate correctly to Supervisor.
+- Pin the container build to Switch Vision SNMP2MQTT core tag `v0.9.7`.
+- Run the repository cutover/runtime regression script before publishing the multi-architecture image.
+
 ## 0.9.6
 
 - Pin the container build to Switch Vision SNMP2MQTT core tag `v0.9.6`.

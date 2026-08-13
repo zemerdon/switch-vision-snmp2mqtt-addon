@@ -11,6 +11,21 @@ grep -q 'use_switch_vision_generated_yaml: true' "$ROOT/switch-vision-snmp2mqtt/
 grep -q 'Generated targets:' "$RUN"
 grep -q 'Generated sensors:' "$RUN"
 grep -q 'Generated YAML SHA-256:' "$RUN"
+grep -q "bashio::services mqtt 'host'" "$RUN"
+grep -q "bashio::services mqtt 'username'" "$RUN"
+grep -q "bashio::services mqtt 'password'" "$RUN"
+grep -q 'SV_MQTT_HOST' "$RUN"
+grep -q 'exec node /app/dist/index.js' "$RUN"
+if grep -q '^bashio::exit.ok' "$RUN"; then
+  echo 'Wrapper still masks the SNMP2MQTT core exit status' >&2
+  exit 1
+fi
+grep -q 'mqtt:need' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+if grep -q '^[[:space:]]*host:[[:space:]]*localhost[[:space:]]*$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
+  echo 'Fresh-install localhost MQTT default remains' >&2
+  exit 1
+fi
+grep -q 'sh tests/validate-cutover.sh' "$ROOT/.github/workflows/build.yml"
 grep -q 'local_apps:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q 'all_app_configs:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '/config/app_configs/switch_vision_snmp2mqtt/' "$RUN"

@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -18,6 +19,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+
+      - name: Validate repository cutover and runtime wrapper
+        run: sh tests/validate-cutover.sh
 
       - name: Read app metadata
         id: metadata
@@ -39,6 +43,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -50,7 +55,7 @@ jobs:
         with:
           context: ./switch-vision-snmp2mqtt
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ github.event_name == 'push' }}
           tags: |
             ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:${{ steps.metadata.outputs.version }}
             ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:latest
@@ -61,5 +66,5 @@ jobs:
             BUILD_REPOSITORY=zemerdon/switch-vision-snmp2mqtt-addon
             BUILD_REF=${{ github.sha }}
             BUILD_DATE=${{ steps.metadata.outputs.build_date }}
-            CORE_VERSION=v0.9.6
-            CACHE_BUST=core-v0.9.6-${{ github.run_id }}-${{ github.run_attempt }}
+            CORE_VERSION=v0.9.7
+            CACHE_BUST=core-v0.9.7-${{ github.run_id }}-${{ github.run_attempt }}
