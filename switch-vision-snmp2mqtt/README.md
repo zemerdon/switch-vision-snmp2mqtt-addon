@@ -4,9 +4,19 @@ Home Assistant app wrapper for the Switch Vision SNMP2MQTT polling backend.
 
 ## Core version
 
-This app is pinned to Switch Vision SNMP2MQTT core `v0.9.6`.
+This app is pinned to Switch Vision SNMP2MQTT core `v0.9.7`.
 
-Core v0.9.6 adds Juniper EX VLAN and trunk discovery using numeric OIDs. No local Juniper MIB installation is required at runtime.
+Core v0.9.7 retains Juniper EX VLAN/trunk discovery and adds validated `object_id` support. No local Juniper MIB installation is required at runtime.
+
+## MQTT service resolution
+
+Fresh installations use Home Assistant's declared MQTT service automatically.
+The app reads the Supervisor-provided MQTT host, port, username, and password
+through Bashio. Existing v0.9.6 options that still contain the old `localhost`
+default are treated as the automatic Supervisor mode.
+
+Setting a different MQTT host explicitly keeps that broker configuration and
+does not replace its credentials with Supervisor service credentials.
 
 ## Switch Vision Discovery import
 
