@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - main
+  pull_request:
   workflow_dispatch:
 
 permissions:
@@ -42,6 +43,7 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Log in to GHCR
+        if: github.event_name == 'push'
         uses: docker/login-action@v3
         with:
           registry: ghcr.io
@@ -53,7 +55,7 @@ jobs:
         with:
           context: ./switch-vision-snmp2mqtt
           platforms: linux/amd64,linux/arm64
-          push: true
+          push: ${{ github.event_name == 'push' }}
           tags: |
             ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:${{ steps.metadata.outputs.version }}
             ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:latest
