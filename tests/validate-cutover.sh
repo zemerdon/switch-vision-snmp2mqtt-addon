@@ -16,6 +16,17 @@ grep -q "bashio::services mqtt 'username'" "$RUN"
 grep -q "bashio::services mqtt 'password'" "$RUN"
 grep -q 'SV_MQTT_HOST' "$RUN"
 grep -q 'exec node /app/dist/index.js' "$RUN"
+grep -q '^version: 0.9.8$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^ARG CORE_VERSION=v0.9.8$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -q '^ARG CORE_COMMIT=0cdbbfe843c47cd596bd02401cab07dc11827b63$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -q 'CORE_VERSION=v0.9.8' "$ROOT/.github/workflows/build.yml"
+grep -q 'CORE_COMMIT=0cdbbfe843c47cd596bd02401cab07dc11827b63' "$ROOT/.github/workflows/build.yml"
+grep -q '^umask 077$' "$RUN"
+grep -q 'chmod 700 "${IMPORTED_TARGETS_DIR}"' "$RUN"
+grep -q 'chmod 700 "${BACKUP_DIR}"' "$RUN"
+grep -q 'chmod 600 "${BACKUP_FILE}"' "$RUN"
+grep -q 'chmod 600 "${IMPORTED_TARGETS_PATH}"' "$RUN"
+grep -q 'chmod 600 /app/config.yml' "$RUN"
 if grep -q '^bashio::exit.ok' "$RUN"; then
   echo 'Wrapper still masks the SNMP2MQTT core exit status' >&2
   exit 1
