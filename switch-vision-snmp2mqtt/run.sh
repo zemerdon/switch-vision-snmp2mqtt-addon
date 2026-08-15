@@ -1,5 +1,8 @@
 #!/usr/bin/with-contenv bashio
 
+# Credential-bearing generated config and backups are private by default.
+umask 077
+
 # ==============================================================================
 # Switch Vision SNMP2MQTT
 # SNMP2MQTT bridge with optional Switch Vision Discovery generated YAML import.
@@ -111,18 +114,23 @@ if bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}"; then
   bashio::log.info "Generated sensors: ${GENERATED_SENSOR_COUNT}"
   bashio::log.info "Generated YAML SHA-256: ${GENERATED_SHA256}"
 
-  mkdir -p "$(dirname "${IMPORTED_TARGETS_PATH}")"
+  IMPORTED_TARGETS_DIR="$(dirname "${IMPORTED_TARGETS_PATH}")"
+  mkdir -p "${IMPORTED_TARGETS_DIR}"
+  chmod 700 "${IMPORTED_TARGETS_DIR}"
 
   if bashio::var.true "${BACKUP_EXISTING_CONFIG}" && [ -f "${TARGET_PATH}" ]; then
     BACKUP_DIR="/config/app_configs/switch_vision_snmp2mqtt/backups"
     BACKUP_FILE="${BACKUP_DIR}/targets-$(date -u +%Y%m%dT%H%M%SZ).yaml"
     mkdir -p "${BACKUP_DIR}"
+    chmod 700 "${BACKUP_DIR}"
     cp "${TARGET_PATH}" "${BACKUP_FILE}"
+    chmod 600 "${BACKUP_FILE}"
     bashio::log.info 'Existing SNMP2MQTT targets config backed up to:'
     bashio::log.blue "                  ${BACKUP_FILE}"
   fi
 
   cp "${SWITCH_VISION_GENERATED_YAML_PATH}" "${IMPORTED_TARGETS_PATH}"
+  chmod 600 "${IMPORTED_TARGETS_PATH}"
   TARGET_PATH="${IMPORTED_TARGETS_PATH}"
 
   bashio::log.info 'Switch Vision generated YAML validated and imported to:'
@@ -202,6 +210,7 @@ yq -p json -o yaml \
    | .mqtt.password = strenv(SV_MQTT_PASSWORD)' \
   "${CONFIG_PATH}" > /app/config.yml
 cat "${TARGET_PATH}" >> /app/config.yml
+chmod 600 /app/config.yml
 
 bashio::log.info
 bashio::log.info 'Configuration - Targets from:'

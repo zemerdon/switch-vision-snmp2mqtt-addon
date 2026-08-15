@@ -4,9 +4,9 @@ Home Assistant app wrapper for the Switch Vision SNMP2MQTT polling backend.
 
 ## Core version
 
-This app is pinned to Switch Vision SNMP2MQTT core `v0.9.7`.
+This app is pinned to Switch Vision SNMP2MQTT core `v0.9.8` at audited commit `0cdbbfe843c47cd596bd02401cab07dc11827b63`.
 
-Core v0.9.7 retains Juniper EX VLAN/trunk discovery and adds validated `object_id` support. No local Juniper MIB installation is required at runtime.
+Core v0.9.8 retains Juniper EX VLAN/trunk discovery and validated `object_id` support, while adding restricted transforms, strict SNMP version handling, SNMPv3 semantic validation, duplicate explicit Home Assistant object-ID rejection, and overlapping-poll protection. No local Juniper MIB installation is required at runtime.
 
 ## MQTT service resolution
 
@@ -53,7 +53,7 @@ Generated import can be disabled and the manual targets path used instead:
 
 ## Juniper EX VLAN and trunk support
 
-Core v0.9.6 can correlate standard bridge tables with Juniper EX VLAN tables to derive:
+Core v0.9.8 retains the Juniper EX logic that correlates standard bridge tables with Juniper EX VLAN tables to derive:
 
 - access or trunk mode
 - native/PVID VLAN
@@ -62,6 +62,10 @@ Core v0.9.6 can correlate standard bridge tables with Juniper EX VLAN tables to 
 - untagged VLANs
 
 The implementation uses numeric OIDs so the app does not depend on locally installed MIB files.
+
+## Private runtime files
+
+The wrapper runs with `umask 077`. Imported generated YAML, automatic target backups, and `/app/config.yml` are forced to owner-only permissions because they may contain SNMP or MQTT credentials.
 
 ## Current HAOS paths
 

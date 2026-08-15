@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.8
+
+- Build and publish the Home Assistant app against hardened Switch Vision SNMP2MQTT core `v0.9.8`.
+- Verify that core tag `v0.9.8` resolves to audited core commit `0cdbbfe843c47cd596bd02401cab07dc11827b63` during the container build.
+- Inherit core v0.9.8 restricted transforms, strict SNMP version handling, SNMPv3 semantic validation, duplicate explicit Home Assistant `object_id` rejection, and overlapping-poll protection.
+- Set `umask 077` in the runtime wrapper and enforce owner-only modes on imported generated YAML, local backups, and the generated runtime configuration.
+- Extend the repository cutover regression gate to verify the v0.9.8 core pin and private runtime-file contract.
+
 ## 0.9.7
 
 - Resolve the Home Assistant Supervisor MQTT service automatically for fresh installs and migrated `localhost` defaults.
