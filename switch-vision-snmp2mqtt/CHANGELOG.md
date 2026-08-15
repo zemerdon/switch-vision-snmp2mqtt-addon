@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.9
+
+- Build and publish the Home Assistant app against Switch Vision SNMP2MQTT core `v0.9.9`.
+- Verify that core tag `v0.9.9` resolves to merge commit `9b8cfcf481bbb4139a0a3c0564a0e33264b3317a` during the container build.
+- Add runtime live IF-MIB interface-name resolution for dynamic ifIndex changes and Juniper EX3300 SFP/SFP+ hot-plug handling.
+- Support alternate `xe-...` / `ge-...` interface candidates without requiring regenerated YAML when the active uplink mode changes.
+- Preserve existing MQTT, generated-YAML import, private runtime-file, and Supervisor integration behavior.
+
 ## 0.9.8
 
 - Build and publish the Home Assistant app against hardened Switch Vision SNMP2MQTT core `v0.9.8`.
