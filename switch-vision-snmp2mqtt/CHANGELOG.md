@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.11
+
+- Build the Home Assistant app against Switch Vision SNMP2MQTT Core `v0.9.11` at exact merge commit `e25140122506a90a8c47b90d9e6d78ab8448deb6`.
+- Remove the unused writable `local_apps` and `all_app_configs` mounts from the app sandbox.
+- Retain only the mappings required by the current wrapper workflow: `/config` read/write for imported targets/backups, `/share` read/write for Switch Vision generated YAML handoff, and `/ssl` read-only for TLS material.
+- Extend the cutover regression so the removed broad writable mappings cannot accidentally return.
+- Preserve generated-YAML import, backup/config paths, Supervisor MQTT discovery, EX3300 handling, and SNMP/MQTT runtime behavior unchanged.
+
 ## 0.9.10
 
 - Build and publish the Home Assistant app against Switch Vision SNMP2MQTT Core `v0.9.10`.

@@ -16,11 +16,11 @@ grep -q "bashio::services mqtt 'username'" "$RUN"
 grep -q "bashio::services mqtt 'password'" "$RUN"
 grep -q 'SV_MQTT_HOST' "$RUN"
 grep -q 'exec node /app/dist/index.js' "$RUN"
-grep -q '^version: 0.9.10$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
-grep -q '^ARG CORE_VERSION=v0.9.10$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
-grep -q '^ARG CORE_COMMIT=b5416827a8c53729c61ea842e45c9ec42c96249d$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
-grep -q 'CORE_VERSION=v0.9.10' "$ROOT/.github/workflows/build.yml"
-grep -q 'CORE_COMMIT=b5416827a8c53729c61ea842e45c9ec42c96249d' "$ROOT/.github/workflows/build.yml"
+grep -q '^version: 0.9.11$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^ARG CORE_VERSION=v0.9.11$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -q '^ARG CORE_COMMIT=e25140122506a90a8c47b90d9e6d78ab8448deb6$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -q 'CORE_VERSION=v0.9.11' "$ROOT/.github/workflows/build.yml"
+grep -q 'CORE_COMMIT=e25140122506a90a8c47b90d9e6d78ab8448deb6' "$ROOT/.github/workflows/build.yml"
 grep -q '^umask 077$' "$RUN"
 grep -q 'chmod 700 "${IMPORTED_TARGETS_DIR}"' "$RUN"
 grep -q 'chmod 700 "${BACKUP_DIR}"' "$RUN"
@@ -37,8 +37,16 @@ if grep -q '^[[:space:]]*host:[[:space:]]*localhost[[:space:]]*$' "$ROOT/switch-
   exit 1
 fi
 grep -q 'sh tests/validate-cutover.sh' "$ROOT/.github/workflows/build.yml"
-grep -q 'local_apps:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
-grep -q 'all_app_configs:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+if grep -q 'local_apps:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
+  echo 'Unused local_apps writable mapping remains' >&2
+  exit 1
+fi
+if grep -q 'all_app_configs:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
+  echo 'Unused all_app_configs writable mapping remains' >&2
+  exit 1
+fi
+grep -q 'config:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q 'share:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q 'ssl:ro' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 if grep -q 'ssl:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
   echo 'SSL mapping remains writable' >&2

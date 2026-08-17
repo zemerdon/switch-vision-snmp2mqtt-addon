@@ -15,9 +15,9 @@ WORKDIR /app
 
 # Clone
 ARG SOURCE_REPO=zemerdon
-ARG CORE_VERSION=v0.9.10
-ARG CORE_COMMIT=b5416827a8c53729c61ea842e45c9ec42c96249d
-ARG CACHE_BUST=core-v0.9.10
+ARG CORE_VERSION=v0.9.11
+ARG CORE_COMMIT=e25140122506a90a8c47b90d9e6d78ab8448deb6
+ARG CACHE_BUST=core-v0.9.11
 
 RUN echo "Cache bust: ${CACHE_BUST}" \
  && git clone --branch "${CORE_VERSION}" --single-branch https://github.com/${SOURCE_REPO}/switch-vision-snmp2mqtt.git /tmp/snmp2mqtt \
