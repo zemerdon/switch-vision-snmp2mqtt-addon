@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.12
+
+- Build the Home Assistant app against Switch Vision SNMP2MQTT Core `v0.9.12` at exact merge commit `e9a961f25fd3eb205321d8494c596911fa97fc49`.
+- Pin the Node `lts-alpine3.22` builder image to immutable multi-architecture OCI digest `sha256:191c9f0080fcbbc6547a85dc0ff7988072214a355aabdc1d2ec55a7dae5eea8a`.
+- Pin the Home Assistant runtime base image to immutable multi-architecture OCI digest `sha256:94ff231402a5e7ad2a82e261ad5fa4ffae7d7bb095c3febb2edbdf309c9b6aca`.
+- Prevent future wrapper rebuilds from silently consuming different builder or runtime base images without an explicit source change.
+- Preserve reduced writable mounts, generated-YAML import, backup/config handling, Supervisor MQTT integration, Juniper EX3300 live-interface behavior, graceful shutdown handling, and Core runtime behavior unchanged.
+
 ## 0.9.11
 
 - Build the Home Assistant app against Switch Vision SNMP2MQTT Core `v0.9.11` at exact merge commit `e25140122506a90a8c47b90d9e6d78ab8448deb6`.

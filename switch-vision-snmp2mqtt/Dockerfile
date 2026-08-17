@@ -1,7 +1,7 @@
-ARG BUILD_FROM=ghcr.io/home-assistant/base:latest
+ARG BUILD_FROM=ghcr.io/home-assistant/base:latest@sha256:94ff231402a5e7ad2a82e261ad5fa4ffae7d7bb095c3febb2edbdf309c9b6aca
 
 ### Build snmp2mqtt
-FROM node:lts-alpine3.22 AS builder
+FROM node:lts-alpine3.22@sha256:191c9f0080fcbbc6547a85dc0ff7988072214a355aabdc1d2ec55a7dae5eea8a AS builder
 
 # Packages
 RUN \
@@ -15,9 +15,9 @@ WORKDIR /app
 
 # Clone
 ARG SOURCE_REPO=zemerdon
-ARG CORE_VERSION=v0.9.11
-ARG CORE_COMMIT=e25140122506a90a8c47b90d9e6d78ab8448deb6
-ARG CACHE_BUST=core-v0.9.11
+ARG CORE_VERSION=v0.9.12
+ARG CORE_COMMIT=e9a961f25fd3eb205321d8494c596911fa97fc49
+ARG CACHE_BUST=core-v0.9.12
 
 RUN echo "Cache bust: ${CACHE_BUST}" \
  && git clone --branch "${CORE_VERSION}" --single-branch https://github.com/${SOURCE_REPO}/switch-vision-snmp2mqtt.git /tmp/snmp2mqtt \
