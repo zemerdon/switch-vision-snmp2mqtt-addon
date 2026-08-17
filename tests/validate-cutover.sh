@@ -16,11 +16,11 @@ grep -q "bashio::services mqtt 'username'" "$RUN"
 grep -q "bashio::services mqtt 'password'" "$RUN"
 grep -q 'SV_MQTT_HOST' "$RUN"
 grep -q 'exec node /app/dist/index.js' "$RUN"
-grep -q '^version: 0.9.9$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
-grep -q '^ARG CORE_VERSION=v0.9.9$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
-grep -q '^ARG CORE_COMMIT=9b8cfcf481bbb4139a0a3c0564a0e33264b3317a$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
-grep -q 'CORE_VERSION=v0.9.9' "$ROOT/.github/workflows/build.yml"
-grep -q 'CORE_COMMIT=9b8cfcf481bbb4139a0a3c0564a0e33264b3317a' "$ROOT/.github/workflows/build.yml"
+grep -q '^version: 0.9.10$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^ARG CORE_VERSION=v0.9.10$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -q '^ARG CORE_COMMIT=b5416827a8c53729c61ea842e45c9ec42c96249d$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -q 'CORE_VERSION=v0.9.10' "$ROOT/.github/workflows/build.yml"
+grep -q 'CORE_COMMIT=b5416827a8c53729c61ea842e45c9ec42c96249d' "$ROOT/.github/workflows/build.yml"
 grep -q '^umask 077$' "$RUN"
 grep -q 'chmod 700 "${IMPORTED_TARGETS_DIR}"' "$RUN"
 grep -q 'chmod 700 "${BACKUP_DIR}"' "$RUN"
@@ -39,6 +39,11 @@ fi
 grep -q 'sh tests/validate-cutover.sh' "$ROOT/.github/workflows/build.yml"
 grep -q 'local_apps:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q 'all_app_configs:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q 'ssl:ro' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+if grep -q 'ssl:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
+  echo 'SSL mapping remains writable' >&2
+  exit 1
+fi
 grep -q '/config/app_configs/switch_vision_snmp2mqtt/' "$RUN"
 if grep -RiqE 'addons_config|all_addon_configs|^[[:space:]]*-[[:space:]]*addons:rw' "$ROOT/switch-vision-snmp2mqtt" --exclude='CHANGELOG.md' --exclude='*.png'; then
   echo 'Previous Home Assistant path or mapping found' >&2
