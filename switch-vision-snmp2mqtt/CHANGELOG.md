@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.10
+
+- Build and publish the Home Assistant app against Switch Vision SNMP2MQTT Core `v0.9.10`.
+- Verify that Core tag `v0.9.10` resolves to merge commit `b5416827a8c53729c61ea842e45c9ec42c96249d` during the container build.
+- Inherit Core v0.9.10 graceful `SIGTERM` handling and single-flight shutdown protection without changing existing Home Assistant app stop behaviour.
+- Change the Home Assistant `/ssl` mapping from writable to read-only; certificate/key files remain available for MQTT TLS configuration without giving the bridge write access to the SSL store.
+- Extend the existing cutover regression to verify the v0.9.10 Core pin and read-only SSL mapping.
+- Preserve generated-YAML import, backup/config paths, MQTT service discovery, EX3300 live-interface handling, and existing writable mappings required by the current wrapper workflow.
+
 ## 0.9.9
 
 - Build and publish the Home Assistant app against Switch Vision SNMP2MQTT core `v0.9.9`.
