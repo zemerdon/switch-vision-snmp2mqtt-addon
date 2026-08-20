@@ -39,16 +39,29 @@ fi
 
 # ==============================================================================
 CONFIG_PATH=/data/options.json
-TARGET_PATH="$(bashio::config 'targets_path')"
-USE_SWITCH_VISION_GENERATED_YAML="$(bashio::config 'use_switch_vision_generated_yaml')"
-SWITCH_VISION_GENERATED_YAML_PATH="$(bashio::config 'switch_vision_generated_yaml_path')"
-IMPORTED_TARGETS_PATH="$(bashio::config 'imported_targets_path')"
-BACKUP_EXISTING_CONFIG="$(bashio::config 'backup_existing_config')"
+TARGET_PATH="$(bashio::config 'targets_path' 2>/dev/null || true)"
+USE_SWITCH_VISION_GENERATED_YAML="$(bashio::config 'use_switch_vision_generated_yaml' 2>/dev/null || true)"
+SWITCH_VISION_GENERATED_YAML_PATH="$(bashio::config 'switch_vision_generated_yaml_path' 2>/dev/null || true)"
+IMPORTED_TARGETS_PATH="$(bashio::config 'imported_targets_path' 2>/dev/null || true)"
+BACKUP_EXISTING_CONFIG="$(bashio::config 'backup_existing_config' 2>/dev/null || true)"
+
+# Bashio renders some absent optional values as the literal string "null".
+# Normalize all wrapper-owned options before applying defaults so an upgraded
+# pre-generated-YAML installation can never try to open a file literally named
+# "null".
+[ "${TARGET_PATH}" = "null" ] && TARGET_PATH=""
+[ "${USE_SWITCH_VISION_GENERATED_YAML}" = "null" ] && USE_SWITCH_VISION_GENERATED_YAML=""
+[ "${SWITCH_VISION_GENERATED_YAML_PATH}" = "null" ] && SWITCH_VISION_GENERATED_YAML_PATH=""
+[ "${IMPORTED_TARGETS_PATH}" = "null" ] && IMPORTED_TARGETS_PATH=""
+[ "${BACKUP_EXISTING_CONFIG}" = "null" ] && BACKUP_EXISTING_CONFIG=""
 
 if [ -z "${TARGET_PATH}" ]; then
   TARGET_PATH="/config/app_configs/switch_vision_snmp2mqtt/targets.yaml"
-  bashio::log.notice 'Switch to default file with Targets:'
-  bashio::log.notice " ${TARGET_PATH}"
+fi
+
+if [ -z "${USE_SWITCH_VISION_GENERATED_YAML}" ]; then
+  USE_SWITCH_VISION_GENERATED_YAML="true"
+  bashio::log.notice 'Generated-YAML import option was absent; using the Switch Vision default (enabled).'
 fi
 
 if [ -z "${SWITCH_VISION_GENERATED_YAML_PATH}" ]; then
@@ -58,6 +71,21 @@ fi
 if [ -z "${IMPORTED_TARGETS_PATH}" ]; then
   IMPORTED_TARGETS_PATH="/config/app_configs/switch_vision_snmp2mqtt/imported/generated-snmp2mqtt.yaml"
 fi
+
+if [ -z "${BACKUP_EXISTING_CONFIG}" ]; then
+  BACKUP_EXISTING_CONFIG="false"
+fi
+
+switch_vision_generated_yaml_is_valid() {
+  local generated_file="$1"
+  [ -f "${generated_file}" ] || return 1
+  ! grep -q 'CHANGE_ME' "${generated_file}" || return 1
+  grep -q '^# Switch Vision generated SNMP2MQTT YAML' "${generated_file}" || return 1
+  grep -q '^# Source: Switch Vision Discovery' "${generated_file}" || return 1
+  grep -q '^targets:' "${generated_file}" || return 1
+  grep -Eq '^[[:space:]]*-[[:space:]]+host:[[:space:]]+[^[:space:]]+' "${generated_file}" || return 1
+  return 0
+}
 
 validate_switch_vision_generated_yaml() {
   local generated_file="$1"
@@ -95,6 +123,29 @@ validate_switch_vision_generated_yaml() {
 
   return 0
 }
+
+# v0.9.14 migration safety: v0.9.4 deliberately preserved older saved options,
+# so an installation upgraded from the manual-target era can still contain
+# use_switch_vision_generated_yaml=false with no usable manual target file. If
+# that impossible combination is found and Discovery has supplied a valid
+# generated file, recover automatically for this run. A deliberate, functioning
+# manual configuration remains untouched.
+if ! bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}" && [ ! -f "${TARGET_PATH}" ]; then
+  if switch_vision_generated_yaml_is_valid "${SWITCH_VISION_GENERATED_YAML_PATH}"; then
+    bashio::log.warning 'Legacy manual-target configuration is unusable because its targets file is missing.'
+    bashio::log.warning 'A valid Switch Vision Discovery generated YAML is available; recovering to generated-YAML import for this run.'
+    USE_SWITCH_VISION_GENERATED_YAML="true"
+  else
+    bashio::log.fatal
+    bashio::log.fatal 'Configuration of this app is incomplete.'
+    bashio::log.fatal 'Generated-YAML import is disabled and the manual Targets file does not exist:'
+    bashio::log.fatal " ${TARGET_PATH}"
+    bashio::log.fatal 'No valid Switch Vision Discovery generated YAML is available for automatic recovery:'
+    bashio::log.fatal " ${SWITCH_VISION_GENERATED_YAML_PATH}"
+    bashio::log.fatal
+    bashio::exit.nok
+  fi
+fi
 
 if bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}"; then
   bashio::log.info 'Switch Vision generated YAML import is enabled.'
