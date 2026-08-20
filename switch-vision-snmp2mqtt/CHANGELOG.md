@@ -1,5 +1,14 @@
 # Changelog
 
+## 0.9.14
+
+- Normalize Bashio literal `null` values for wrapper-owned target/import options before applying defaults, so legacy installations never treat `null` as a filesystem path.
+- Default an absent generated-YAML enable option to the current Switch Vision behaviour (`true`).
+- Preserve an explicit manual-target configuration when its configured target file exists.
+- Automatically recover an upgraded legacy installation from unusable manual mode to Discovery generated-YAML import when the manual target file is missing and `/share/switch_vision/generated-snmp2mqtt.yaml` passes the Switch Vision header/target contract.
+- Fail with an explicit dual-source diagnostic when neither the manual target file nor a valid generated file is available; never report `File with Targets config not found: null`.
+- Keep Switch Vision SNMP2MQTT Core pinned to `v0.9.13` at `bc8bd1a057b21bc7f779325222a971130da3839e`; this release changes only the Home Assistant wrapper/migration behaviour.
+
 ## 0.9.13
 
 - Build the Home Assistant app against Switch Vision SNMP2MQTT Core `v0.9.13` at exact merge commit `bc8bd1a057b21bc7f779325222a971130da3839e`.
@@ -50,7 +59,7 @@
 ## 0.9.7
 
 - Resolve the Home Assistant Supervisor MQTT service automatically for fresh installs and migrated `localhost` defaults.
-- Preserve explicit custom MQTT broker hosts and credentials.
+- Preserve explicit custom broker hosts and credentials.
 - Pass Supervisor MQTT host, port, username and password into the generated runtime configuration without logging secrets.
 - Replace the shell wrapper with the Node process so fatal core exits and stop signals propagate correctly to Supervisor.
 - Pin the container build to Switch Vision SNMP2MQTT core tag `v0.9.7`.
