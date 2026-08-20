@@ -3,6 +3,7 @@ set -eu
 ROOT="$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)"
 RUN="$ROOT/switch-vision-snmp2mqtt/run.sh"
 FIXTURE="$ROOT/tests/generated-snmp2mqtt.yaml"
+bash -n "$RUN"
 grep -q '^# Switch Vision generated SNMP2MQTT YAML' "$FIXTURE"
 grep -q '^# Source: Switch Vision Discovery' "$FIXTURE"
 grep -q '/share/switch_vision/generated-snmp2mqtt.yaml' "$RUN"
