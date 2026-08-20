@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.13
+
+- Build the Home Assistant app against Switch Vision SNMP2MQTT Core `v0.9.13` at exact merge commit `bc8bd1a057b21bc7f779325222a971130da3839e`.
+- Inherit the Core v0.9.13 Node 20 type-definition alignment without changing SNMP polling, live IF-MIB resolution, Juniper EX3300 handling, MQTT lifecycle, transforms, shutdown behaviour, or Home Assistant discovery semantics.
+- Preserve the immutable Node/Home Assistant base-image pins, reduced writable mounts, generated-YAML import, backup/config handling, and Supervisor MQTT integration from v0.9.12.
+
 ## 0.9.12
 
 - Build the Home Assistant app against Switch Vision SNMP2MQTT Core `v0.9.12` at exact merge commit `e9a961f25fd3eb205321d8494c596911fa97fc49`.

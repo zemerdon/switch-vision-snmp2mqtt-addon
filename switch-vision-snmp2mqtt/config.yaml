@@ -1,6 +1,6 @@
 ---
 name: Switch Vision SNMP2MQTT
-version: 0.9.12
+version: 0.9.13
 slug: switch_vision_snmp2mqtt
 description: Switch Vision SNMP to MQTT bridge with Discovery generated YAML import
   and Juniper EX VLAN/trunk support
@@ -28,33 +28,3 @@ options:
   use_switch_vision_generated_yaml: true
   switch_vision_generated_yaml_path: /share/switch_vision/generated-snmp2mqtt.yaml
   imported_targets_path: /config/app_configs/switch_vision_snmp2mqtt/imported/generated-snmp2mqtt.yaml
-  backup_existing_config: true
-  homeassistant:
-    discovery: true
-    prefix: homeassistant
-schema:
-  mqtt:
-    host: str?
-    port: port?
-    username: str?
-    password: str?
-    client_id: str?
-    keepalive: int?
-    clean: bool?
-    retain: bool?
-    qos: int?
-    base_topic: str?
-    host_name_as_target: bool?
-    ca: str?
-    cert: str?
-    key: str?
-    reject_unauthorized: bool?
-  targets_path: str
-  use_switch_vision_generated_yaml: bool
-  switch_vision_generated_yaml_path: str
-  imported_targets_path: str
-  backup_existing_config: bool
-  homeassistant:
-    discovery: bool?
-    prefix: str?
-  log: list(debug|info|warning|error)?
