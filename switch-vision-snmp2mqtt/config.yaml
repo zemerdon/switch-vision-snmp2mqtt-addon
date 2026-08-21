@@ -1,6 +1,6 @@
 ---
 name: Switch Vision SNMP2MQTT
-version: 0.9.14
+version: 0.9.15
 slug: switch_vision_snmp2mqtt
 description: Switch Vision SNMP to MQTT bridge with Discovery generated YAML import
   and Juniper EX VLAN/trunk support
@@ -23,8 +23,23 @@ panel_icon: mdi:cog-transfer-outline
 panel_title: Switch Vision SNMP2MQTT
 options:
   mqtt:
+    host: ""
     port: 1883
+    username: ""
+    password: ""
   targets_path: /config/app_configs/switch_vision_snmp2mqtt/targets.yaml
   use_switch_vision_generated_yaml: true
   switch_vision_generated_yaml_path: /share/switch_vision/generated-snmp2mqtt.yaml
   imported_targets_path: /config/app_configs/switch_vision_snmp2mqtt/imported/generated-snmp2mqtt.yaml
+  backup_existing_config: false
+schema:
+  mqtt:
+    host: str?
+    port: port
+    username: str?
+    password: password?
+  targets_path: str
+  use_switch_vision_generated_yaml: bool
+  switch_vision_generated_yaml_path: str
+  imported_targets_path: str
+  backup_existing_config: bool

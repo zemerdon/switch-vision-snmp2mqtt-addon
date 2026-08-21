@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.15
+
+- Restore the Home Assistant app `schema:` for the existing MQTT, manual-target, generated-YAML import, imported-target and backup options so Supervisor renders the Configuration/Options controls again.
+- Add explicit defaults for optional MQTT host/username/password and `backup_existing_config` while preserving automatic Supervisor MQTT resolution when the host is blank.
+- Keep Switch Vision SNMP2MQTT Core pinned to `v0.9.13` at `bc8bd1a057b21bc7f779325222a971130da3839e`; runtime polling and generated-YAML recovery behavior are unchanged from 0.9.14.
+- Add permanent cutover checks requiring the Options schema and visible wrapper-owned fields.
+
 ## 0.9.14
 
 - Normalize Bashio literal `null` values for wrapper-owned target/import options before applying defaults, so legacy installations never treat `null` as a filesystem path.
