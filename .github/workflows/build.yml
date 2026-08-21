@@ -9,16 +9,20 @@ on:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
-  build:
-    name: Build and publish multi-arch image
+  validate:
+    name: Validate and build multi-arch image
     runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.metadata.outputs.version }}
+      build_date: ${{ steps.metadata.outputs.build_date }}
 
     steps:
       - name: Checkout
         uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
 
       - name: Validate repository cutover and runtime wrapper
         run: sh tests/validate-cutover.sh
@@ -42,8 +46,48 @@ jobs:
       - name: Set up Buildx
         uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
 
+      - name: Build without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: ./switch-vision-snmp2mqtt
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: |
+            ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:${{ steps.metadata.outputs.version }}
+            ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:latest
+          build-args: |
+            BUILD_VERSION=${{ steps.metadata.outputs.version }}
+            BUILD_NAME=Switch Vision SNMP2MQTT
+            BUILD_DESCRIPTION=Switch Vision SNMP to MQTT bridge for Home Assistant
+            BUILD_REPOSITORY=zemerdon/switch-vision-snmp2mqtt-addon
+            BUILD_REF=${{ github.sha }}
+            BUILD_DATE=${{ steps.metadata.outputs.build_date }}
+            CORE_VERSION=v0.9.13
+            CORE_COMMIT=bc8bd1a057b21bc7f779325222a971130da3839e
+            CACHE_BUST=core-v0.9.13-${{ github.run_id }}-${{ github.run_attempt }}
+
+  publish:
+    name: Publish multi-arch image
+    needs: validate
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          persist-credentials: false
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
       - name: Log in to GHCR
-        if: github.event_name == 'push'
         uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
         with:
           registry: ghcr.io
@@ -55,17 +99,17 @@ jobs:
         with:
           context: ./switch-vision-snmp2mqtt
           platforms: linux/amd64,linux/arm64
-          push: ${{ github.event_name == 'push' }}
+          push: true
           tags: |
-            ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:${{ steps.metadata.outputs.version }}
+            ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:${{ needs.validate.outputs.version }}
             ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:latest
           build-args: |
-            BUILD_VERSION=${{ steps.metadata.outputs.version }}
+            BUILD_VERSION=${{ needs.validate.outputs.version }}
             BUILD_NAME=Switch Vision SNMP2MQTT
             BUILD_DESCRIPTION=Switch Vision SNMP to MQTT bridge for Home Assistant
             BUILD_REPOSITORY=zemerdon/switch-vision-snmp2mqtt-addon
             BUILD_REF=${{ github.sha }}
-            BUILD_DATE=${{ steps.metadata.outputs.build_date }}
+            BUILD_DATE=${{ needs.validate.outputs.build_date }}
             CORE_VERSION=v0.9.13
             CORE_COMMIT=bc8bd1a057b21bc7f779325222a971130da3839e
             CACHE_BUST=core-v0.9.13-${{ github.run_id }}-${{ github.run_attempt }}
