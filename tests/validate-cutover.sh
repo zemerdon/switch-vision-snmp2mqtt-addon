@@ -17,7 +17,7 @@ grep -q "bashio::services mqtt 'username'" "$RUN"
 grep -q "bashio::services mqtt 'password'" "$RUN"
 grep -q 'SV_MQTT_HOST' "$RUN"
 grep -q 'exec node /app/dist/index.js' "$RUN"
-grep -q '^version: 0.9.16$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^version: 0.9.17$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^schema:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^  mqtt:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -Fq '    host: str?' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
@@ -79,9 +79,21 @@ if grep -q 'all_app_configs:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; the
   echo 'Unused all_app_configs writable mapping remains' >&2
   exit 1
 fi
-grep -q 'config:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
-grep -q 'share:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
-grep -q 'ssl:ro' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+# v0.9.17: Home Assistant OS 18.2 deprecates the legacy `config` map key.
+# Use the current mapping name, but pin its container path to /config so every
+# established Switch Vision SNMP2MQTT option/path remains compatible.
+grep -q '^- type: homeassistant_config$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^  path: /config$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^- type: share$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^- type: ssl$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+if grep -q '^[[:space:]]*-[[:space:]]*config:rw[[:space:]]*$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
+  echo 'Deprecated Home Assistant config map remains' >&2
+  exit 1
+fi
+if grep -q '^  homeassistant:' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
+  echo 'Top-level Home Assistant metadata leaked into the options/schema block' >&2
+  exit 1
+fi
 if grep -q 'ssl:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
   echo 'SSL mapping remains writable' >&2
   exit 1
