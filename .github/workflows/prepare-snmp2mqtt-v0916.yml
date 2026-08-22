@@ -1,0 +1,125 @@
+name: Prepare SNMP2MQTT v0.9.16 UniFi-only idle handling
+
+on:
+  push:
+    branches:
+      - fix/unifi-only-no-yaml-v0916
+
+permissions:
+  contents: write
+
+jobs:
+  prepare:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out branch
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+
+      - name: Prepare 0.9.16 wrapper fix
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 - <<'PY'
+          from pathlib import Path
+          from textwrap import dedent
+
+          run = Path('switch-vision-snmp2mqtt/run.sh')
+          text = run.read_text(encoding='utf-8')
+          old = dedent('''\
+          if bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}"; then
+            bashio::log.info 'Switch Vision generated YAML import is enabled.'
+            bashio::log.info 'Switch Vision generated YAML path:'
+            bashio::log.blue "                  ${SWITCH_VISION_GENERATED_YAML_PATH}"
+
+            if ! validate_switch_vision_generated_yaml "${SWITCH_VISION_GENERATED_YAML_PATH}"; then
+              bashio::exit.nok
+            fi
+          ''')
+          new = dedent('''\
+          if bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}"; then
+            bashio::log.info 'Switch Vision generated YAML import is enabled.'
+            bashio::log.info 'Switch Vision generated YAML path:'
+            bashio::log.blue "                  ${SWITCH_VISION_GENERATED_YAML_PATH}"
+
+            # A missing generated file is an inactive state, not malformed input.
+            # Discovery starts/restarts this app after publishing a valid SNMP YAML.
+            # This is also the normal state on UniFi2MQTT-only installations.
+            if [ ! -f "${SWITCH_VISION_GENERATED_YAML_PATH}" ]; then
+              bashio::log.notice 'No Switch Vision generated SNMP2MQTT YAML is currently published.'
+              bashio::log.notice 'SNMP2MQTT will remain stopped until Discovery publishes an SNMP target file.'
+              bashio::log.notice 'This is expected on UniFi2MQTT-only installations.'
+              exit 0
+            fi
+
+            if ! validate_switch_vision_generated_yaml "${SWITCH_VISION_GENERATED_YAML_PATH}"; then
+              bashio::exit.nok
+            fi
+          ''')
+          if old not in text:
+              raise SystemExit('Expected generated-YAML startup block was not found')
+          run.write_text(text.replace(old, new, 1), encoding='utf-8', newline='\n')
+
+          config = Path('switch-vision-snmp2mqtt/config.yaml')
+          cfg = config.read_text(encoding='utf-8')
+          if 'version: 0.9.15' not in cfg:
+              raise SystemExit('Expected 0.9.15 version missing from config.yaml')
+          config.write_text(cfg.replace('version: 0.9.15', 'version: 0.9.16', 1), encoding='utf-8', newline='\n')
+
+          test = Path('tests/validate-cutover.sh')
+          checks = test.read_text(encoding='utf-8')
+          if "grep -q '^version: 0.9.15$'" not in checks:
+              raise SystemExit('Expected 0.9.15 test assertion missing')
+          checks = checks.replace("grep -q '^version: 0.9.15$'", "grep -q '^version: 0.9.16$'", 1)
+          anchor = "grep -Fq 'No valid Switch Vision Discovery generated YAML is available for automatic recovery:' \"$RUN\"\n"
+          addition = anchor + dedent('''\
+          grep -Fq 'if [ ! -f "${SWITCH_VISION_GENERATED_YAML_PATH}" ]; then' "$RUN"
+          grep -Fq 'No Switch Vision generated SNMP2MQTT YAML is currently published.' "$RUN"
+          grep -Fq 'SNMP2MQTT will remain stopped until Discovery publishes an SNMP target file.' "$RUN"
+          grep -Fq 'This is expected on UniFi2MQTT-only installations.' "$RUN"
+          grep -Fq 'exit 0' "$RUN"
+          ''')
+          if anchor not in checks:
+              raise SystemExit('Could not locate v0.9.14 recovery test anchor')
+          checks = checks.replace(anchor, addition, 1)
+          test.write_text(checks, encoding='utf-8', newline='\n')
+
+          changelog = Path('switch-vision-snmp2mqtt/CHANGELOG.md')
+          old_log = changelog.read_text(encoding='utf-8')
+          if not old_log.startswith('# Changelog\n\n## 0.9.15'):
+              raise SystemExit('Unexpected changelog head')
+          entry = dedent('''\
+          ## 0.9.16
+
+          - Treat an absent Switch Vision generated SNMP2MQTT YAML as a clean inactive state instead of a fatal configuration error when generated-YAML import is enabled.
+          - Exit cleanly until Discovery publishes an SNMP target file; this is the expected behaviour for UniFi2MQTT-only installations and for SNMP installations before their first successful Discovery publication.
+          - Keep fail-closed validation for any generated YAML file that does exist: placeholders, missing headers, missing targets and missing target hosts still stop startup with a clear fatal error.
+          - Keep manual-target mode strict: disabling generated-YAML import still requires a usable manual targets file unless the existing legacy-recovery contract can safely switch to a valid generated file.
+          - Keep Switch Vision SNMP2MQTT Core pinned to `v0.9.13` at `bc8bd1a057b21bc7f779325222a971130da3839e`; this release changes only Home Assistant wrapper startup semantics.
+
+          ''')
+          changelog.write_text('# Changelog\n\n' + entry + old_log[len('# Changelog\n\n'):], encoding='utf-8', newline='\n')
+          PY
+
+          rm -f .github/workflows/prepare-snmp2mqtt-v0916.yml
+
+      - name: Validate 0.9.16
+        shell: bash
+        run: |
+          set -euo pipefail
+          sh tests/validate-cutover.sh
+          bash -n switch-vision-snmp2mqtt/run.sh
+          grep -q '^version: 0.9.16$' switch-vision-snmp2mqtt/config.yaml
+          grep -Fq 'This is expected on UniFi2MQTT-only installations.' switch-vision-snmp2mqtt/run.sh
+          git diff --check
+
+      - name: Commit tested 0.9.16 source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name 'switch-vision-release-bot'
+          git config user.email 'switch-vision@users.noreply.github.com'
+          git add -A
+          git commit -m 'Prepare Switch Vision SNMP2MQTT 0.9.16 idle generated-YAML handling'
+          git push origin HEAD:fix/unifi-only-no-yaml-v0916
