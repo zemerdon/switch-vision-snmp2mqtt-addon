@@ -152,6 +152,16 @@ if bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}"; then
   bashio::log.info 'Switch Vision generated YAML path:'
   bashio::log.blue "                  ${SWITCH_VISION_GENERATED_YAML_PATH}"
 
+  # A missing generated file is an inactive state, not malformed input.
+  # Discovery starts/restarts this app after publishing a valid SNMP YAML.
+  # This is also the normal state on UniFi2MQTT-only installations.
+  if [ ! -f "${SWITCH_VISION_GENERATED_YAML_PATH}" ]; then
+    bashio::log.notice 'No Switch Vision generated SNMP2MQTT YAML is currently published.'
+    bashio::log.notice 'SNMP2MQTT will remain stopped until Discovery publishes an SNMP target file.'
+    bashio::log.notice 'This is expected on UniFi2MQTT-only installations.'
+    exit 0
+  fi
+
   if ! validate_switch_vision_generated_yaml "${SWITCH_VISION_GENERATED_YAML_PATH}"; then
     bashio::exit.nok
   fi

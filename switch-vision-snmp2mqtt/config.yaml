@@ -1,6 +1,6 @@
 ---
 name: Switch Vision SNMP2MQTT
-version: 0.9.15
+version: 0.9.16
 slug: switch_vision_snmp2mqtt
 description: Switch Vision SNMP to MQTT bridge with Discovery generated YAML import
   and Juniper EX VLAN/trunk support

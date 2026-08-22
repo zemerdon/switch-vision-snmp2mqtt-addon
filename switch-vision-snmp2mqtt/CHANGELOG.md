@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.16
+
+- Treat an absent Switch Vision generated SNMP2MQTT YAML as a clean inactive state instead of a fatal configuration error when generated-YAML import is enabled.
+- Exit cleanly until Discovery publishes an SNMP target file; this is the expected behaviour for UniFi2MQTT-only installations and for SNMP installations before their first successful Discovery publication.
+- Keep fail-closed validation for any generated YAML file that does exist: placeholders, missing headers, missing targets and missing target hosts still stop startup with a clear fatal error.
+- Keep manual-target mode strict: disabling generated-YAML import still requires a usable manual targets file unless the existing legacy-recovery contract can safely switch to a valid generated file.
+- Keep Switch Vision SNMP2MQTT Core pinned to `v0.9.13` at `bc8bd1a057b21bc7f779325222a971130da3839e`; this release changes only Home Assistant wrapper startup semantics.
+
 ## 0.9.15
 
 - Restore the Home Assistant app `schema:` for the existing MQTT, manual-target, generated-YAML import, imported-target and backup options so Supervisor renders the Configuration/Options controls again.
