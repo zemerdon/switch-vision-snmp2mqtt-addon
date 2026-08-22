@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.9.17
+
+- Replace the deprecated Home Assistant `config` mapping with `homeassistant_config` while explicitly keeping the container mount at `/config`, so all existing Switch Vision SNMP2MQTT paths remain unchanged.
+- Keep `/share` writable for the Discovery generated-YAML handoff and `/ssl` read-only for MQTT TLS material using the current structured Home Assistant app mapping syntax.
+- Preserve every existing MQTT, manual-target, generated-YAML import, imported-target and backup option without adding `homeassistant` to the user-options schema; Installer v2.1.27 performs the one-time cleanup of that stray saved option when present.
+- Keep the UniFi2MQTT-only clean-idle behaviour from 0.9.16 and retain fail-closed validation for generated YAML that actually exists.
+- Keep Switch Vision SNMP2MQTT Core pinned to `v0.9.13` at `bc8bd1a057b21bc7f779325222a971130da3839e`; this release changes only Home Assistant wrapper/package compatibility.
+
 ## 0.9.16
 
 - Treat an absent Switch Vision generated SNMP2MQTT YAML as a clean inactive state instead of a fatal configuration error when generated-YAML import is enabled.

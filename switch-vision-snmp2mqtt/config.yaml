@@ -1,6 +1,6 @@
 ---
 name: Switch Vision SNMP2MQTT
-version: 0.9.16
+version: 0.9.17
 slug: switch_vision_snmp2mqtt
 description: Switch Vision SNMP to MQTT bridge with Discovery generated YAML import
   and Juniper EX VLAN/trunk support
@@ -13,9 +13,13 @@ startup: application
 boot: auto
 init: false
 map:
-- config:rw
-- share:rw
-- ssl:ro
+- type: homeassistant_config
+  read_only: false
+  path: /config
+- type: share
+  read_only: false
+- type: ssl
+  read_only: true
 services:
 - mqtt:need
 homeassistant: 2026.7.1
