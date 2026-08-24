@@ -44,6 +44,11 @@ USE_SWITCH_VISION_GENERATED_YAML="$(bashio::config 'use_switch_vision_generated_
 SWITCH_VISION_GENERATED_YAML_PATH="$(bashio::config 'switch_vision_generated_yaml_path' 2>/dev/null || true)"
 IMPORTED_TARGETS_PATH="$(bashio::config 'imported_targets_path' 2>/dev/null || true)"
 BACKUP_EXISTING_CONFIG="$(bashio::config 'backup_existing_config' 2>/dev/null || true)"
+HOMEASSISTANT_DISCOVERY_REQUESTED="$(bashio::config 'homeassistant.discovery' 2>/dev/null || true)"
+HOMEASSISTANT_PREFIX_REQUESTED="$(bashio::config 'homeassistant.prefix' 2>/dev/null || true)"
+GENERATED_TARGET_COUNT=0
+GENERATED_SENSOR_COUNT=0
+GENERATED_SHA256=""
 
 # Bashio renders some absent optional values as the literal string "null".
 # Normalize all wrapper-owned options before applying defaults so an upgraded
@@ -54,6 +59,21 @@ BACKUP_EXISTING_CONFIG="$(bashio::config 'backup_existing_config' 2>/dev/null ||
 [ "${SWITCH_VISION_GENERATED_YAML_PATH}" = "null" ] && SWITCH_VISION_GENERATED_YAML_PATH=""
 [ "${IMPORTED_TARGETS_PATH}" = "null" ] && IMPORTED_TARGETS_PATH=""
 [ "${BACKUP_EXISTING_CONFIG}" = "null" ] && BACKUP_EXISTING_CONFIG=""
+[ "${HOMEASSISTANT_DISCOVERY_REQUESTED}" = "null" ] && HOMEASSISTANT_DISCOVERY_REQUESTED=""
+[ "${HOMEASSISTANT_PREFIX_REQUESTED}" = "null" ] && HOMEASSISTANT_PREFIX_REQUESTED=""
+
+if [ -z "${HOMEASSISTANT_DISCOVERY_REQUESTED}" ]; then
+  HOMEASSISTANT_DISCOVERY_REQUESTED="true"
+fi
+if [ -z "${HOMEASSISTANT_PREFIX_REQUESTED}" ]; then
+  HOMEASSISTANT_PREFIX_REQUESTED="homeassistant"
+fi
+if ! bashio::var.true "${HOMEASSISTANT_DISCOVERY_REQUESTED}"; then
+  bashio::log.warning 'Home Assistant discovery was saved as disabled; Switch Vision requires it and will force it enabled for this run.'
+fi
+if [ "${HOMEASSISTANT_PREFIX_REQUESTED}" != "homeassistant" ]; then
+  bashio::log.warning 'A non-standard Home Assistant discovery prefix is saved; Switch Vision requires homeassistant and will force that prefix for this run.'
+fi
 
 if [ -z "${TARGET_PATH}" ]; then
   TARGET_PATH="/config/app_configs/switch_vision_snmp2mqtt/targets.yaml"
@@ -75,6 +95,7 @@ fi
 if [ -z "${BACKUP_EXISTING_CONFIG}" ]; then
   BACKUP_EXISTING_CONFIG="false"
 fi
+REQUESTED_USE_SWITCH_VISION_GENERATED_YAML="${USE_SWITCH_VISION_GENERATED_YAML}"
 
 switch_vision_generated_yaml_is_valid() {
   local generated_file="$1"
@@ -268,7 +289,9 @@ yq -p json -o yaml \
    | .mqtt.host = strenv(SV_MQTT_HOST)
    | .mqtt.port = (strenv(SV_MQTT_PORT) | tonumber)
    | .mqtt.username = strenv(SV_MQTT_USERNAME)
-   | .mqtt.password = strenv(SV_MQTT_PASSWORD)' \
+   | .mqtt.password = strenv(SV_MQTT_PASSWORD)
+   | .homeassistant.discovery = true
+   | .homeassistant.prefix = "homeassistant"' \
   "${CONFIG_PATH}" > /app/config.yml
 cat "${TARGET_PATH}" >> /app/config.yml
 chmod 600 /app/config.yml
@@ -280,6 +303,39 @@ bashio::log.info 'Configuration - MQTT Host:'
 bashio::log.blue "                  $(bashio::config 'mqtt.host')"
 bashio::log.info 'SNMP2MQTT Start'
 bashio::log.info
+
+# Publish a credential-free effective-runtime snapshot for Support My Switch.
+# This records what the wrapper actually handed to SNMP2MQTT, not just the
+# saved Supervisor options, so support can distinguish configuration from
+# mapping/polling/entity problems without asking the user for screenshots.
+RUNTIME_DIAG_DIR="/share/switch_vision/diagnostics"
+RUNTIME_STATUS="${RUNTIME_DIAG_DIR}/snmp2mqtt-runtime.json"
+RUNTIME_STATUS_TMP="${RUNTIME_STATUS}.$$"
+mkdir -p "${RUNTIME_DIAG_DIR}"
+CONFIGURATION_SOURCE="manual_targets"
+GENERATED_IMPORT_EFFECTIVE=false
+if bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}"; then
+  CONFIGURATION_SOURCE="switch_vision_generated_yaml"
+  GENERATED_IMPORT_EFFECTIVE=true
+fi
+cat > "${RUNTIME_STATUS_TMP}" <<EOF_RUNTIME_STATUS
+{
+  "schema_version": 1,
+  "app_version": "$(bashio::addon.version)",
+  "configuration_source": "${CONFIGURATION_SOURCE}",
+  "generated_yaml_import_requested": "${REQUESTED_USE_SWITCH_VISION_GENERATED_YAML}",
+  "generated_yaml_import_effective": ${GENERATED_IMPORT_EFFECTIVE},
+  "generated_target_count": ${GENERATED_TARGET_COUNT},
+  "generated_sensor_count": ${GENERATED_SENSOR_COUNT},
+  "generated_yaml_sha256": "${GENERATED_SHA256}",
+  "homeassistant_discovery_requested": "${HOMEASSISTANT_DISCOVERY_REQUESTED}",
+  "homeassistant_discovery_effective": true,
+  "homeassistant_prefix_requested": "${HOMEASSISTANT_PREFIX_REQUESTED}",
+  "homeassistant_prefix_effective": "homeassistant"
+}
+EOF_RUNTIME_STATUS
+chmod 600 "${RUNTIME_STATUS_TMP}"
+mv -f "${RUNTIME_STATUS_TMP}" "${RUNTIME_STATUS}"
 
 # ==============================================================================
 bashio::color.blue
