@@ -71,7 +71,10 @@ fi
 if ! bashio::var.true "${HOMEASSISTANT_DISCOVERY_REQUESTED}"; then
   bashio::log.warning 'Home Assistant discovery was saved as disabled; Switch Vision requires it and will force it enabled for this run.'
 fi
-if [ "${HOMEASSISTANT_PREFIX_REQUESTED}" != "homeassistant" ]; then
+HOMEASSISTANT_PREFIX_REQUESTED_MODE="custom"
+if [ "${HOMEASSISTANT_PREFIX_REQUESTED}" = "homeassistant" ]; then
+  HOMEASSISTANT_PREFIX_REQUESTED_MODE="homeassistant"
+else
   bashio::log.warning 'A non-standard Home Assistant discovery prefix is saved; Switch Vision requires homeassistant and will force that prefix for this run.'
 fi
 
@@ -330,7 +333,7 @@ cat > "${RUNTIME_STATUS_TMP}" <<EOF_RUNTIME_STATUS
   "generated_yaml_sha256": "${GENERATED_SHA256}",
   "homeassistant_discovery_requested": "${HOMEASSISTANT_DISCOVERY_REQUESTED}",
   "homeassistant_discovery_effective": true,
-  "homeassistant_prefix_requested": "${HOMEASSISTANT_PREFIX_REQUESTED}",
+  "homeassistant_prefix_requested_mode": "${HOMEASSISTANT_PREFIX_REQUESTED_MODE}",
   "homeassistant_prefix_effective": "homeassistant"
 }
 EOF_RUNTIME_STATUS

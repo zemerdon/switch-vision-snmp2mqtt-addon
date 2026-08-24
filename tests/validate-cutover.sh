@@ -36,6 +36,11 @@ grep -Fq 'HOMEASSISTANT_DISCOVERY_REQUESTED' "$RUN"
 grep -Fq 'Home Assistant discovery was saved as disabled; Switch Vision requires it' "$RUN"
 grep -Fq 'snmp2mqtt-runtime.json' "$RUN"
 grep -Fq '"homeassistant_discovery_effective": true' "$RUN"
+grep -Fq '"homeassistant_prefix_requested_mode"' "$RUN"
+if grep -Fq '"homeassistant_prefix_requested":' "$RUN"; then
+  echo 'Raw custom Home Assistant discovery prefix is still written to diagnostics' >&2
+  exit 1
+fi
 grep -q '^ARG CORE_VERSION=v0.9.13$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^ARG CORE_COMMIT=bc8bd1a057b21bc7f779325222a971130da3839e$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^ARG BUILD_FROM=ghcr.io/home-assistant/base:latest@sha256:94ff231402a5e7ad2a82e261ad5fa4ffae7d7bb095c3febb2edbdf309c9b6aca$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
