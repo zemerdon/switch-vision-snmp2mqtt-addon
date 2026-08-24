@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.18
+
+- Restore the Home Assistant options section with Switch Vision defaults: MQTT discovery enabled and prefix `homeassistant`.
+- Enforce those required effective values in the wrapper so fresh installs, missing options and upgraded installations carrying an old hidden `discovery: false` cannot suppress Home Assistant entity creation.
+- Publish a credential-free effective SNMP2MQTT runtime snapshot under `/share/switch_vision/diagnostics/` for Support My Switch correlation.
+- Preserve generated-YAML/manual-target behavior, MQTT broker handling, Core engine v0.9.13 and all hardware/polling contracts.
+
 ## 0.9.17
 
 - Replace the deprecated Home Assistant `config` mapping with `homeassistant_config` while explicitly keeping the container mount at `/config`, so all existing Switch Vision SNMP2MQTT paths remain unchanged.

@@ -17,7 +17,7 @@ grep -q "bashio::services mqtt 'username'" "$RUN"
 grep -q "bashio::services mqtt 'password'" "$RUN"
 grep -q 'SV_MQTT_HOST' "$RUN"
 grep -q 'exec node /app/dist/index.js' "$RUN"
-grep -q '^version: 0.9.17$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^version: 0.9.18$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^schema:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^  mqtt:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -Fq '    host: str?' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
@@ -25,6 +25,22 @@ grep -Fq '    password: password?' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^  use_switch_vision_generated_yaml: bool$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^  backup_existing_config: bool$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^  backup_existing_config: false$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+[ "$(grep -c '^  homeassistant:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml")" -eq 2 ]
+grep -q '^    discovery: true$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^    prefix: homeassistant$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^    discovery: bool$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^    prefix: str$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -Fq '.homeassistant.discovery = true' "$RUN"
+grep -Fq '.homeassistant.prefix = "homeassistant"' "$RUN"
+grep -Fq 'HOMEASSISTANT_DISCOVERY_REQUESTED' "$RUN"
+grep -Fq 'Home Assistant discovery was saved as disabled; Switch Vision requires it' "$RUN"
+grep -Fq 'snmp2mqtt-runtime.json' "$RUN"
+grep -Fq '"homeassistant_discovery_effective": true' "$RUN"
+grep -Fq '"homeassistant_prefix_requested_mode"' "$RUN"
+if grep -Fq '"homeassistant_prefix_requested":' "$RUN"; then
+  echo 'Raw custom Home Assistant discovery prefix is still written to diagnostics' >&2
+  exit 1
+fi
 grep -q '^ARG CORE_VERSION=v0.9.13$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^ARG CORE_COMMIT=bc8bd1a057b21bc7f779325222a971130da3839e$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^ARG BUILD_FROM=ghcr.io/home-assistant/base:latest@sha256:94ff231402a5e7ad2a82e261ad5fa4ffae7d7bb095c3febb2edbdf309c9b6aca$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
@@ -90,10 +106,9 @@ if grep -q '^[[:space:]]*-[[:space:]]*config:rw[[:space:]]*$' "$ROOT/switch-visi
   echo 'Deprecated Home Assistant config map remains' >&2
   exit 1
 fi
-if grep -q '^  homeassistant:' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
-  echo 'Top-level Home Assistant metadata leaked into the options/schema block' >&2
-  exit 1
-fi
+# v0.9.18: `homeassistant` is intentionally a user-visible SNMP2MQTT
+# configuration section again. The wrapper still forces Switch Vision's
+# required effective discovery=true / prefix=homeassistant contract.
 if grep -q 'ssl:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
   echo 'SSL mapping remains writable' >&2
   exit 1
