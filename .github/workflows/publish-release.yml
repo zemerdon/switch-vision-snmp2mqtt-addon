@@ -104,6 +104,19 @@ jobs:
           test "$version" = "$REQUEST_VERSION"
           echo "build_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
 
+      - name: Refuse an existing semantic version tag
+        if: ${{ steps.request.outputs.publish == 'true' }}
+        shell: bash
+        env:
+          VERSION: ${{ steps.request.outputs.version }}
+          IMAGE: ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon
+        run: |
+          set -euo pipefail
+          if docker buildx imagetools inspect "$IMAGE:$VERSION" >/dev/null 2>&1; then
+            echo "ERROR: SNMP2MQTT image tag $VERSION already exists; semantic release tags are immutable"
+            exit 1
+          fi
+
       - name: Dry-run complete
         if: ${{ steps.request.outputs.publish != 'true' }}
         run: |
@@ -209,9 +222,10 @@ jobs:
     runs-on: ubuntu-latest
     env:
       VERSION: ${{ needs.preflight.outputs.version }}
+      TARGET_SHA: ${{ needs.preflight.outputs.target_sha }}
       IMAGE: ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon
     steps:
-      - name: Verify public manifest
+      - name: Verify public manifest and target revision
         shell: bash
         run: |
           set -euo pipefail
@@ -246,5 +260,10 @@ jobs:
           print('SNMP2MQTT public manifest architectures: PASS')
           PY
 
+          docker pull --quiet --platform linux/amd64 "$version_ref" >/dev/null
+          revision="$(docker image inspect "$version_ref" --format '{{ index .Config.Labels "org.opencontainers.image.revision" }}')"
+          test "$revision" = "$TARGET_SHA"
+
           echo "SNMP2MQTT release publication for $VERSION: PASS"
+          echo "target=$TARGET_SHA"
           echo "digest=$version_digest"
