@@ -1,0 +1,250 @@
+name: Publish SNMP2MQTT Add-on Release
+
+on:
+  pull_request:
+    types:
+      - opened
+      - reopened
+      - synchronize
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  preflight:
+    if: >-
+      github.event.pull_request.head.repo.full_name == github.repository &&
+      startsWith(github.event.pull_request.head.ref, 'release/snmp2mqtt-addon-')
+    name: SNMP2MQTT release preflight
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.request.outputs.version }}
+      target_sha: ${{ steps.request.outputs.target_sha }}
+      publish: ${{ steps.request.outputs.publish }}
+      build_date: ${{ steps.metadata.outputs.build_date }}
+    env:
+      BASE_SHA: ${{ github.event.pull_request.base.sha }}
+
+    steps:
+      - name: Checkout release request
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Validate release request
+        id: request
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f .sv-release-request.json
+
+          git fetch origin main
+          mapfile -t changed < <(git diff --name-only "$BASE_SHA...HEAD")
+          if [ "${#changed[@]}" -ne 1 ] || [ "${changed[0]}" != ".sv-release-request.json" ]; then
+            echo 'ERROR: SNMP2MQTT release-request PR must change only .sv-release-request.json'
+            printf 'Changed: %s\n' "${changed[@]}"
+            exit 1
+          fi
+
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json
+          import re
+          from pathlib import Path
+
+          data = json.loads(Path('.sv-release-request.json').read_text(encoding='utf-8'))
+          version = str(data.get('version') or '').strip().lstrip('v')
+          target = str(data.get('target_sha') or '').strip()
+          publish = data.get('publish', False)
+
+          if not re.fullmatch(r'\d+\.\d+\.\d+', version):
+              raise SystemExit('ERROR: request.version must be an exact semantic version')
+          if not re.fullmatch(r'[0-9a-f]{40}', target):
+              raise SystemExit('ERROR: request.target_sha must be a full 40-character commit SHA')
+          if not isinstance(publish, bool):
+              raise SystemExit('ERROR: request.publish must be true or false')
+
+          print(f'version={version}')
+          print(f'target_sha={target}')
+          print(f'publish={str(publish).lower()}')
+          PY
+
+          TARGET_SHA="$(python3 -c 'import json; print(json.load(open(".sv-release-request.json"))["target_sha"])')"
+          git cat-file -e "$TARGET_SHA^{commit}"
+          git merge-base --is-ancestor "$TARGET_SHA" "$BASE_SHA"
+
+          PUBLISH="$(python3 -c 'import json; print(str(bool(json.load(open(".sv-release-request.json")).get("publish", False))).lower())')"
+          if [ "$PUBLISH" = true ] && [ "$TARGET_SHA" != "$BASE_SHA" ]; then
+            echo 'ERROR: publish requests must target the exact main SHA used as the PR base'
+            echo "target=$TARGET_SHA base=$BASE_SHA"
+            exit 1
+          fi
+
+      - name: Checkout exact release target
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ steps.request.outputs.target_sha }}
+          persist-credentials: false
+
+      - name: Validate exact target source
+        run: sh tests/validate-cutover.sh
+
+      - name: Verify app metadata
+        id: metadata
+        shell: bash
+        env:
+          REQUEST_VERSION: ${{ steps.request.outputs.version }}
+        run: |
+          set -euo pipefail
+          version="$(awk '$1 == "version:" {gsub(/"/, "", $2); print $2; exit}' switch-vision-snmp2mqtt/config.yaml)"
+          test -n "$version"
+          test "$version" = "$REQUEST_VERSION"
+          echo "build_date=$(date -u +%Y-%m-%dT%H:%M:%SZ)" >> "$GITHUB_OUTPUT"
+
+      - name: Dry-run complete
+        if: ${{ steps.request.outputs.publish != 'true' }}
+        run: |
+          echo 'SNMP2MQTT release workflow DRY RUN: PASS'
+          echo 'version=${{ steps.request.outputs.version }}'
+          echo 'target=${{ steps.request.outputs.target_sha }}'
+
+  build_validate:
+    name: Validate exact SNMP2MQTT release build
+    needs: preflight
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout exact release target
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ needs.preflight.outputs.target_sha }}
+          persist-credentials: false
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Build exact target without publishing
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: ./switch-vision-snmp2mqtt
+          platforms: linux/amd64,linux/arm64
+          push: false
+          tags: |
+            ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:${{ needs.preflight.outputs.version }}
+            ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:latest
+          build-args: |
+            BUILD_VERSION=${{ needs.preflight.outputs.version }}
+            BUILD_NAME=Switch Vision SNMP2MQTT
+            BUILD_DESCRIPTION=Switch Vision SNMP to MQTT bridge for Home Assistant
+            BUILD_REPOSITORY=zemerdon/switch-vision-snmp2mqtt-addon
+            BUILD_REF=${{ needs.preflight.outputs.target_sha }}
+            BUILD_DATE=${{ needs.preflight.outputs.build_date }}
+            CORE_VERSION=v0.9.13
+            CORE_COMMIT=bc8bd1a057b21bc7f779325222a971130da3839e
+            CACHE_BUST=core-v0.9.13-${{ github.run_id }}-${{ github.run_attempt }}
+
+  publish:
+    name: Publish exact SNMP2MQTT release
+    needs:
+      - preflight
+      - build_validate
+    if: needs.preflight.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    steps:
+      - name: Checkout exact release target
+        uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          ref: ${{ needs.preflight.outputs.target_sha }}
+          persist-credentials: false
+
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@c7c53464625b32c7a7e944ae62b3e17d2b600130 # v3
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@8d2750c68a42422c14e847fe6c8ac0403b4cbd6f # v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@c94ce9fb468520275223c153574b00df6fe4bcc9 # v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push exact target
+        uses: docker/build-push-action@10e90e3645eae34f1e60eeb005ba3a3d33f178e8 # v6
+        with:
+          context: ./switch-vision-snmp2mqtt
+          platforms: linux/amd64,linux/arm64
+          push: true
+          tags: |
+            ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:${{ needs.preflight.outputs.version }}
+            ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon:latest
+          build-args: |
+            BUILD_VERSION=${{ needs.preflight.outputs.version }}
+            BUILD_NAME=Switch Vision SNMP2MQTT
+            BUILD_DESCRIPTION=Switch Vision SNMP to MQTT bridge for Home Assistant
+            BUILD_REPOSITORY=zemerdon/switch-vision-snmp2mqtt-addon
+            BUILD_REF=${{ needs.preflight.outputs.target_sha }}
+            BUILD_DATE=${{ needs.preflight.outputs.build_date }}
+            CORE_VERSION=v0.9.13
+            CORE_COMMIT=bc8bd1a057b21bc7f779325222a971130da3839e
+            CACHE_BUST=core-v0.9.13-${{ github.run_id }}-${{ github.run_attempt }}
+
+  verify:
+    name: Verify SNMP2MQTT publication
+    needs:
+      - preflight
+      - publish
+    if: needs.preflight.outputs.publish == 'true'
+    runs-on: ubuntu-latest
+    env:
+      VERSION: ${{ needs.preflight.outputs.version }}
+      IMAGE: ghcr.io/zemerdon/switch-vision-snmp2mqtt-addon
+    steps:
+      - name: Verify public manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          version_ref="$IMAGE:$VERSION"
+          latest_ref="$IMAGE:latest"
+
+          for attempt in $(seq 1 12); do
+            if docker buildx imagetools inspect "$version_ref" >/tmp/version.inspect 2>/dev/null && \
+               docker buildx imagetools inspect "$latest_ref" >/tmp/latest.inspect 2>/dev/null; then
+              break
+            fi
+            sleep 5
+          done
+
+          version_digest="$(awk '/^Digest:/ {print $2; exit}' /tmp/version.inspect)"
+          latest_digest="$(awk '/^Digest:/ {print $2; exit}' /tmp/latest.inspect)"
+          test -n "$version_digest"
+          test "$version_digest" = "$latest_digest"
+
+          docker buildx imagetools inspect "$version_ref" --raw >/tmp/manifest.json
+          python3 - <<'PY'
+          import json
+          data = json.load(open('/tmp/manifest.json', encoding='utf-8'))
+          arches = {
+              item.get('platform', {}).get('architecture')
+              for item in data.get('manifests', [])
+              if isinstance(item, dict)
+          }
+          missing = {'amd64', 'arm64'} - arches
+          if missing:
+              raise SystemExit(f'missing required SNMP2MQTT architectures: {sorted(missing)}')
+          print('SNMP2MQTT public manifest architectures: PASS')
+          PY
+
+          echo "SNMP2MQTT release publication for $VERSION: PASS"
+          echo "digest=$version_digest"
