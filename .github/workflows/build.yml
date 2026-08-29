@@ -33,13 +33,19 @@ jobs:
           set -euo pipefail
           python3 - <<'PY'
           from pathlib import Path
+          import re
 
           build = Path('.github/workflows/build.yml').read_text(encoding='utf-8')
           publisher = Path('.github/workflows/publish-release.yml').read_text(encoding='utf-8')
 
-          for forbidden in ('packages: write', 'push: true', 'Log in to GHCR'):
-              if forbidden in build:
-                  raise SystemExit(f'automatic publication capability remains in build.yml: {forbidden}')
+          forbidden = (
+              (r'^\s+packages:\s*write\s*$', 'packages: write'),
+              (r'^\s+push:\s*true\s*$', 'push: true'),
+              (r'^\s+- name:\s*Log in to GHCR\s*$', 'Log in to GHCR'),
+          )
+          for pattern, label in forbidden:
+              if re.search(pattern, build, re.MULTILINE):
+                  raise SystemExit(f'automatic publication capability remains in build.yml: {label}')
 
           required = (
               "startsWith(github.event.pull_request.head.ref, 'release/snmp2mqtt-addon-')",
