@@ -1,5 +1,12 @@
 # Changelog
 
+## 1.0.0
+
+- Build the Home Assistant app against Switch Vision SNMP2MQTT engine `v1.0.0` at exact merge commit `7da789fd54f11619a2772288c1765e47ff728585`.
+- Inherit EX3300 dual-personality candidate identity/state debounce, pending/stale suppression and stable resume behavior without requiring generated-YAML regeneration when GE/XE mode changes.
+- Preserve Supervisor MQTT resolution, Home Assistant discovery defaults, generated-YAML/manual-target handling, privacy-safe runtime diagnostics and existing app configuration paths.
+- Keep the engine pin identical across the Dockerfile, normal CI build and guarded release publisher, with permanent cutover checks for the exact tag/commit pair.
+
 ## 0.9.18
 
 - Restore the Home Assistant options section with Switch Vision defaults: MQTT discovery enabled and prefix `homeassistant`.
