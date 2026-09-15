@@ -97,6 +97,6 @@ jobs:
             BUILD_REPOSITORY=zemerdon/switch-vision-snmp2mqtt-addon
             BUILD_REF=${{ github.sha }}
             BUILD_DATE=${{ steps.metadata.outputs.build_date }}
-            CORE_VERSION=v1.0.0
-            CORE_COMMIT=7da789fd54f11619a2772288c1765e47ff728585
-            CACHE_BUST=core-v1.0.0-${{ github.run_id }}-${{ github.run_attempt }}
+            CORE_VERSION=v1.0.1
+            CORE_COMMIT=e80c215d0867b3bb46893d13c7022cad600f99fc
+            CACHE_BUST=core-v1.0.1-${{ github.run_id }}-${{ github.run_attempt }}
