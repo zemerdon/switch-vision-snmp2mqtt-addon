@@ -49,6 +49,8 @@ HOMEASSISTANT_PREFIX_REQUESTED="$(bashio::config 'homeassistant.prefix' 2>/dev/n
 GENERATED_TARGET_COUNT=0
 GENERATED_SENSOR_COUNT=0
 GENERATED_SHA256=""
+SWITCH_VISION_GENERATION_ID=""
+SWITCH_VISION_GENERATION_ID_PRESENT=false
 
 # Bashio renders some absent optional values as the literal string "null".
 # Normalize all wrapper-owned options before applying defaults so an upgraded
@@ -193,11 +195,28 @@ if bashio::var.true "${USE_SWITCH_VISION_GENERATED_YAML}"; then
   GENERATED_TARGET_COUNT="$(grep -Ec '^[[:space:]]*-[[:space:]]+host:[[:space:]]+[^[:space:]]+' "${SWITCH_VISION_GENERATED_YAML_PATH}" || true)"
   GENERATED_SENSOR_COUNT="$(grep -Ec '^[[:space:]]*-[[:space:]]+oid:[[:space:]]+' "${SWITCH_VISION_GENERATED_YAML_PATH}" || true)"
   GENERATED_SHA256="$(sha256sum "${SWITCH_VISION_GENERATED_YAML_PATH}" | awk '{print $1}')"
+  SWITCH_VISION_GENERATION_ID="$(
+    grep -m1 -E '^# Switch Vision generation ID: [0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$' \
+      "${SWITCH_VISION_GENERATED_YAML_PATH}" 2>/dev/null \
+      | sed 's/^# Switch Vision generation ID: //' \
+      | tr '[:upper:]' '[:lower:]' \
+      || true
+  )"
+  if printf '%s' "${SWITCH_VISION_GENERATION_ID}" | grep -Eq '^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$'; then
+    SWITCH_VISION_GENERATION_ID_PRESENT=true
+  else
+    SWITCH_VISION_GENERATION_ID=""
+  fi
 
   bashio::log.info 'Switch Vision generated YAML validated.'
   bashio::log.info "Generated targets: ${GENERATED_TARGET_COUNT}"
   bashio::log.info "Generated sensors: ${GENERATED_SENSOR_COUNT}"
   bashio::log.info "Generated YAML SHA-256: ${GENERATED_SHA256}"
+  if [ "${SWITCH_VISION_GENERATION_ID_PRESENT}" = true ]; then
+    bashio::log.info 'Switch Vision generation marker: present (exact-load verification enabled).'
+  else
+    bashio::log.notice 'Switch Vision generation marker: not present; exact-load verification is unavailable for this legacy/manual generated file.'
+  fi
 
   IMPORTED_TARGETS_DIR="$(dirname "${IMPORTED_TARGETS_PATH}")"
   mkdir -p "${IMPORTED_TARGETS_DIR}"
@@ -283,6 +302,7 @@ else
 fi
 
 export SV_MQTT_HOST SV_MQTT_PORT SV_MQTT_USERNAME SV_MQTT_PASSWORD
+export SWITCH_VISION_GENERATION_ID
 
 bashio::log.info 'SNMP2MQTT Starting...'
 
@@ -331,6 +351,7 @@ cat > "${RUNTIME_STATUS_TMP}" <<EOF_RUNTIME_STATUS
   "generated_target_count": ${GENERATED_TARGET_COUNT},
   "generated_sensor_count": ${GENERATED_SENSOR_COUNT},
   "generated_yaml_sha256": "${GENERATED_SHA256}",
+  "generated_yaml_generation_marker_present": ${SWITCH_VISION_GENERATION_ID_PRESENT},
   "homeassistant_discovery_requested": "${HOMEASSISTANT_DISCOVERY_REQUESTED}",
   "homeassistant_discovery_effective": true,
   "homeassistant_prefix_requested_mode": "${HOMEASSISTANT_PREFIX_REQUESTED_MODE}",

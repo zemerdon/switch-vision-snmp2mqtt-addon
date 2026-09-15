@@ -159,9 +159,9 @@ jobs:
             BUILD_REPOSITORY=zemerdon/switch-vision-snmp2mqtt-addon
             BUILD_REF=${{ needs.preflight.outputs.target_sha }}
             BUILD_DATE=${{ needs.preflight.outputs.build_date }}
-            CORE_VERSION=v1.0.0
-            CORE_COMMIT=7da789fd54f11619a2772288c1765e47ff728585
-            CACHE_BUST=core-v1.0.0-${{ github.run_id }}-${{ github.run_attempt }}
+            CORE_VERSION=v1.0.1
+            CORE_COMMIT=084c0d528dedec5f90767f16a7c03b57fec28e49
+            CACHE_BUST=core-v1.0.1-${{ github.run_id }}-${{ github.run_attempt }}
 
   publish:
     name: Publish exact SNMP2MQTT release
@@ -209,9 +209,9 @@ jobs:
             BUILD_REPOSITORY=zemerdon/switch-vision-snmp2mqtt-addon
             BUILD_REF=${{ needs.preflight.outputs.target_sha }}
             BUILD_DATE=${{ needs.preflight.outputs.build_date }}
-            CORE_VERSION=v1.0.0
-            CORE_COMMIT=7da789fd54f11619a2772288c1765e47ff728585
-            CACHE_BUST=core-v1.0.0-${{ github.run_id }}-${{ github.run_attempt }}
+            CORE_VERSION=v1.0.1
+            CORE_COMMIT=084c0d528dedec5f90767f16a7c03b57fec28e49
+            CACHE_BUST=core-v1.0.1-${{ github.run_id }}-${{ github.run_attempt }}
 
   verify:
     name: Verify SNMP2MQTT publication
