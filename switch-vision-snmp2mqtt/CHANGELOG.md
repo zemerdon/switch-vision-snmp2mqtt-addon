@@ -2,7 +2,7 @@
 
 ## 1.0.1
 
-- Build the Home Assistant app against Switch Vision SNMP2MQTT engine `v1.0.1` at exact commit `e80c215d0867b3bb46893d13c7022cad600f99fc`.
+- Build the Home Assistant app against Switch Vision SNMP2MQTT engine `v1.0.1` at exact commit `084c0d528dedec5f90767f16a7c03b57fec28e49`.
 - Read Discovery's optional opaque `# Switch Vision generation ID:` UUID from the validated generated YAML and export it to the engine as `SWITCH_VISION_GENERATION_ID` without exposing SNMP or MQTT credentials.
 - Record only whether the generation marker is present in the privacy-safe runtime diagnostic; the UUID itself is not written there.
 - Preserve older generated YAML and manual-target compatibility when the marker is absent while enabling Discovery to verify the exact generated configuration on current releases.

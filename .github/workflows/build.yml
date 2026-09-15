@@ -98,5 +98,5 @@ jobs:
             BUILD_REF=${{ github.sha }}
             BUILD_DATE=${{ steps.metadata.outputs.build_date }}
             CORE_VERSION=v1.0.1
-            CORE_COMMIT=e80c215d0867b3bb46893d13c7022cad600f99fc
+            CORE_COMMIT=084c0d528dedec5f90767f16a7c03b57fec28e49
             CACHE_BUST=core-v1.0.1-${{ github.run_id }}-${{ github.run_attempt }}

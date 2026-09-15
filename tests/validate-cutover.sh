@@ -45,13 +45,13 @@ if grep -Fq '"homeassistant_prefix_requested":' "$RUN"; then
   exit 1
 fi
 grep -q '^ARG CORE_VERSION=v1.0.1$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
-grep -q '^ARG CORE_COMMIT=e80c215d0867b3bb46893d13c7022cad600f99fc$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -q '^ARG CORE_COMMIT=084c0d528dedec5f90767f16a7c03b57fec28e49$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^ARG BUILD_FROM=ghcr.io/home-assistant/base:latest@sha256:94ff231402a5e7ad2a82e261ad5fa4ffae7d7bb095c3febb2edbdf309c9b6aca$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^FROM node:lts-alpine3.22@sha256:191c9f0080fcbbc6547a85dc0ff7988072214a355aabdc1d2ec55a7dae5eea8a AS builder$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q 'CORE_VERSION=v1.0.1' "$ROOT/.github/workflows/build.yml"
-grep -q 'CORE_COMMIT=e80c215d0867b3bb46893d13c7022cad600f99fc' "$ROOT/.github/workflows/build.yml"
+grep -q 'CORE_COMMIT=084c0d528dedec5f90767f16a7c03b57fec28e49' "$ROOT/.github/workflows/build.yml"
 grep -q 'CORE_VERSION=v1.0.1' "$ROOT/.github/workflows/publish-release.yml"
-grep -q 'CORE_COMMIT=e80c215d0867b3bb46893d13c7022cad600f99fc' "$ROOT/.github/workflows/publish-release.yml"
+grep -q 'CORE_COMMIT=084c0d528dedec5f90767f16a7c03b57fec28e49' "$ROOT/.github/workflows/publish-release.yml"
 grep -q '^umask 077$' "$RUN"
 grep -q 'chmod 700 "${IMPORTED_TARGETS_DIR}"' "$RUN"
 grep -q 'chmod 700 "${BACKUP_DIR}"' "$RUN"
