@@ -20,7 +20,7 @@ grep -q "bashio::services mqtt 'username'" "$RUN"
 grep -q "bashio::services mqtt 'password'" "$RUN"
 grep -q 'SV_MQTT_HOST' "$RUN"
 grep -q 'exec node /app/dist/index.js' "$RUN"
-grep -q '^version: 1.0.1$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^version: 1.0.2$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^schema:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^  mqtt:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -Fq '    host: str?' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
@@ -48,6 +48,10 @@ grep -q '^ARG CORE_VERSION=v1.0.1$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^ARG CORE_COMMIT=084c0d528dedec5f90767f16a7c03b57fec28e49$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^ARG BUILD_FROM=ghcr.io/home-assistant/base:latest@sha256:94ff231402a5e7ad2a82e261ad5fa4ffae7d7bb095c3febb2edbdf309c9b6aca$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^FROM node:lts-alpine3.22@sha256:191c9f0080fcbbc6547a85dc0ff7988072214a355aabdc1d2ec55a7dae5eea8a AS builder$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+if grep -q '^STOPSIGNAL[[:space:]]\+SIGINT$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"; then
+  echo 'Legacy SIGINT Docker stop override remains; Home Assistant must use the default SIGTERM lifecycle.' >&2
+  exit 1
+fi
 grep -q 'CORE_VERSION=v1.0.1' "$ROOT/.github/workflows/build.yml"
 grep -q 'CORE_COMMIT=084c0d528dedec5f90767f16a7c03b57fec28e49' "$ROOT/.github/workflows/build.yml"
 grep -q 'CORE_VERSION=v1.0.1' "$ROOT/.github/workflows/publish-release.yml"

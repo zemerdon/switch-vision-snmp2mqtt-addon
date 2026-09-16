@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.2
+
+- Restore the Home Assistant/Docker default `SIGTERM` stop path by removing the wrapper image's legacy `STOPSIGNAL SIGINT` override.
+- Keep the SNMP2MQTT engine pinned unchanged at `v1.0.1` / `084c0d528dedec5f90767f16a7c03b57fec28e49`; that engine already handles both `SIGTERM` and `SIGINT` gracefully.
+- Add a permanent package regression preventing the `SIGINT` stop override from returning, so Supervisor stop lifecycle can be validated cleanly on the Local primary HAOS fixture.
+
 ## 1.0.1
 
 - Build the Home Assistant app against Switch Vision SNMP2MQTT engine `v1.0.1` at exact commit `084c0d528dedec5f90767f16a7c03b57fec28e49`.

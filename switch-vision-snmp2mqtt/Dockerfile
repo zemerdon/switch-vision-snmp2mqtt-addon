@@ -39,8 +39,6 @@ RUN yarn install --frozen-lockfile --production
 
 ### App
 FROM $BUILD_FROM
-STOPSIGNAL SIGINT
-
 # Packages
 RUN \
   apk add --no-cache --virtual .build-dependencies \
