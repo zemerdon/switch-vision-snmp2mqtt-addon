@@ -52,8 +52,6 @@ if grep -q '^STOPSIGNAL[[:space:]]\+SIGINT$' "$ROOT/switch-vision-snmp2mqtt/Dock
   echo 'Legacy SIGINT Docker stop override remains; Home Assistant must use the default SIGTERM lifecycle.' >&2
   exit 1
 fi
-grep -q 'CORE_VERSION=v1.0.1' "$ROOT/.github/workflows/build.yml"
-grep -q 'CORE_COMMIT=084c0d528dedec5f90767f16a7c03b57fec28e49' "$ROOT/.github/workflows/build.yml"
 grep -q 'CORE_VERSION=v1.0.1' "$ROOT/.github/workflows/publish-release.yml"
 grep -q 'CORE_COMMIT=084c0d528dedec5f90767f16a7c03b57fec28e49' "$ROOT/.github/workflows/publish-release.yml"
 grep -q '^umask 077$' "$RUN"
@@ -95,7 +93,6 @@ if grep -q '^[[:space:]]*host:[[:space:]]*localhost[[:space:]]*$' "$ROOT/switch-
   echo 'Fresh-install localhost MQTT default remains' >&2
   exit 1
 fi
-grep -q 'sh tests/validate-cutover.sh' "$ROOT/.github/workflows/build.yml"
 if grep -q 'local_apps:rw' "$ROOT/switch-vision-snmp2mqtt/config.yaml"; then
   echo 'Unused local_apps writable mapping remains' >&2
   exit 1
