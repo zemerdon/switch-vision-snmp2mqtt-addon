@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.3
+
+- Build the Home Assistant app against Switch Vision SNMP2MQTT engine `v1.0.2` at exact commit `1e1f4b78b399ba0f3257043f29ffdfcce95f82c6`.
+- Deliver the engine dependency-security repair: native Node Counter64 decoding, patched `ws`, `brace-expansion`, and `fast-uri`, and removal of the unpatched `bigint-buffer` dependency.
+- Preserve the existing Home Assistant/Supervisor lifecycle, generated-YAML import, MQTT, and configuration behavior while inheriting the engine's zero-advisory production dependency tree and permanent security-floor regression.
+
 ## 1.0.2
 
 - Restore the Home Assistant/Docker default `SIGTERM` stop path by removing the wrapper image's legacy `STOPSIGNAL SIGINT` override.
