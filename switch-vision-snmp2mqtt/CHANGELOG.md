@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.4
+
+- Build the Home Assistant app against Switch Vision SNMP2MQTT engine `v1.0.3` at exact commit `a65a8d3af41eb1e5bb9014c2e0db3d4c0f01a350`.
+- Deliver BER-safe Counter64 decoding so valid short IF-MIB high-capacity traffic counters no longer fail with an eight-byte-buffer warning.
+- Preserve the existing Supervisor lifecycle, generated-YAML import, MQTT configuration and dependency-security baseline while adding exact engine-pin cutover validation.
+
 ## 1.0.3
 
 - Build the Home Assistant app against Switch Vision SNMP2MQTT engine `v1.0.2` at exact commit `1e1f4b78b399ba0f3257043f29ffdfcce95f82c6`.
