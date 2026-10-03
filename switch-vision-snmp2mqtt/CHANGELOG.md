@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.5
+
+- Add the coordinated product-owned local-first release gate at `tools/sv_release_check.py --mode release`, validating the Home Assistant app together with the exact local SNMP2MQTT engine source.
+- Require the add-on Docker/workflow engine version+commit pin to exist in local engine authority and remain tree-equivalent to current local engine `main`; any real engine content drift now fails closed until the pin is deliberately updated.
+- Run the full engine yarn regression suite, add-on cutover regression, release-gate regression, Docker/source-hygiene checks, and repository-state preservation checks without changing SNMP polling, MQTT, generated-YAML, or Supervisor runtime behavior.
+
 ## 1.0.4
 
 - Build the Home Assistant app against Switch Vision SNMP2MQTT engine `v1.0.3` at exact commit `a65a8d3af41eb1e5bb9014c2e0db3d4c0f01a350`.

@@ -4,9 +4,9 @@ Home Assistant app wrapper for the Switch Vision SNMP2MQTT polling backend.
 
 ## Core version
 
-This app is pinned to Switch Vision SNMP2MQTT core `v0.9.8` at audited commit `0cdbbfe843c47cd596bd02401cab07dc11827b63`.
+This app is pinned to Switch Vision SNMP2MQTT engine `v1.0.3` at audited commit `a65a8d3af41eb1e5bb9014c2e0db3d4c0f01a350`.
 
-Core v0.9.8 retains Juniper EX VLAN/trunk discovery and validated `object_id` support, while adding restricted transforms, strict SNMP version handling, SNMPv3 semantic validation, duplicate explicit Home Assistant object-ID rejection, and overlapping-poll protection. No local Juniper MIB installation is required at runtime.
+Engine v1.0.3 keeps the established SNMP polling, live interface resolution, MQTT, transform and shutdown contracts while adding BER-safe variable-length Counter64 decoding and retaining the dependency-security repairs from v1.0.2. No local Juniper MIB installation is required at runtime.
 
 ## MQTT service resolution
 
