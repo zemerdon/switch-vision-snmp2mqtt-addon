@@ -153,50 +153,10 @@ def validate_engine_coordination(
             "SNMP2MQTT app engine version pin does not match local engine"
         )
 
-    cat = subprocess.run(
-        [
-            "git",
-            "-c",
-            f"safe.directory={engine_root}",
-            "-C",
-            str(engine_root),
-            "cat-file",
-            "-e",
-            f"{pinned_commit}^{{commit}}",
-        ],
-        text=True,
-        stdout=subprocess.PIPE,
-        stderr=subprocess.PIPE,
-        check=False,
-    )
-    if cat.returncode:
+    if pinned_commit != engine_source_sha:
         raise SystemExit(
-            "SNMP2MQTT pinned engine commit is unavailable in local authority"
-        )
-
-    diff = subprocess.run(
-        [
-            "git",
-            "-c",
-            f"safe.directory={engine_root}",
-            "-C",
-            str(engine_root),
-            "diff",
-            "--quiet",
-            pinned_commit,
-            engine_source_sha,
-            "--",
-        ],
-        check=False,
-    )
-    if diff.returncode == 1:
-        raise SystemExit(
-            "SNMP2MQTT local engine content has drifted from the app's "
-            "pinned engine commit"
-        )
-    if diff.returncode != 0:
-        raise SystemExit(
-            "SNMP2MQTT engine tree-equivalence check failed"
+            "SNMP2MQTT app engine commit pin does not match the exact "
+            "coordinated engine source SHA"
         )
 
     workflow = (
@@ -234,7 +194,7 @@ def validate_engine_coordination(
     print(
         "SNMP2MQTT coordinated engine contract: PASS "
         f"(v{engine_version}, local={engine_source_sha}, "
-        f"pinned={pinned_commit}, tree-equivalent)"
+        f"pinned={pinned_commit}, exact-sha)"
     )
     return engine_version, pinned_commit
 

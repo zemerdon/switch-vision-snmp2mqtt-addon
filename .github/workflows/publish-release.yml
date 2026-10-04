@@ -165,7 +165,7 @@ jobs:
             BUILD_REF=${{ needs.preflight.outputs.target_sha }}
             BUILD_DATE=${{ needs.preflight.outputs.build_date }}
             CORE_VERSION=v1.0.3
-            CORE_COMMIT=a65a8d3af41eb1e5bb9014c2e0db3d4c0f01a350
+            CORE_COMMIT=d8cb67963ce5c8e11988307b934c545fa063f87d
             CACHE_BUST=core-v1.0.3-${{ github.run_id }}-${{ github.run_attempt }}
 
   publish:
@@ -215,7 +215,7 @@ jobs:
             BUILD_REF=${{ needs.preflight.outputs.target_sha }}
             BUILD_DATE=${{ needs.preflight.outputs.build_date }}
             CORE_VERSION=v1.0.3
-            CORE_COMMIT=a65a8d3af41eb1e5bb9014c2e0db3d4c0f01a350
+            CORE_COMMIT=d8cb67963ce5c8e11988307b934c545fa063f87d
             CACHE_BUST=core-v1.0.3-${{ github.run_id }}-${{ github.run_attempt }}
 
   verify:

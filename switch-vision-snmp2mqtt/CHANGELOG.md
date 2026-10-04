@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.6
+
+- Rebind the Home Assistant app, Docker build and guarded public publisher to the exact canonical SNMP2MQTT engine `main` identity `d8cb67963ce5c8e11988307b934c545fa063f87d` for engine `v1.0.3`; this merge SHA is tree-identical to the previously audited engine commit, so runtime behavior is unchanged.
+- Tighten the coordinated release gate from tree-equivalence compatibility to exact engine SHA/version equality, eliminating the last same-content/different-identity publication exception.
+- Preserve SNMP polling, MQTT, generated-YAML, Supervisor lifecycle and existing app behavior while making Phase 1b publication identity fully exact and replay-safe.
+
 ## 1.0.5
 
 - Add the coordinated product-owned local-first release gate at `tools/sv_release_check.py --mode release`, validating the Home Assistant app together with the exact local SNMP2MQTT engine source.
