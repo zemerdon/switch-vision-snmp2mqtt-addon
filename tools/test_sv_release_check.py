@@ -18,15 +18,15 @@ SPEC.loader.exec_module(release)
 
 
 class SNMPFamilyReleaseCheckTests(unittest.TestCase):
-    def test_current_app_version_is_1_0_7(self):
-        self.assertEqual(release.resolve_addon_version(ROOT), "1.0.7")
+    def test_current_app_version_is_1_0_8(self):
+        self.assertEqual(release.resolve_addon_version(ROOT), "1.0.8")
 
     def test_engine_pin_is_exact_public_engine(self):
         version, commit = release.addon_engine_pin(ROOT)
-        self.assertEqual(version, "1.0.3")
+        self.assertEqual(version, "1.0.4")
         self.assertEqual(
             commit,
-            "d8cb67963ce5c8e11988307b934c545fa063f87d",
+            "c97041dcfa0a7d974020e7f7450ac8a2f55be3f8",
         )
 
     def test_release_dependency_set_is_intentionally_empty(self):

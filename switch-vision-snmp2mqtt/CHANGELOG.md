@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.8
+
+- Build the Home Assistant app against exact Switch Vision SNMP2MQTT engine `v1.0.4` at canonical commit `c97041dcfa0a7d974020e7f7450ac8a2f55be3f8`.
+- Deliver the exact-model Sirivision SR-S25G3420F chassis-uptime source used by Discovery 3.0.19 when the device SNMP agent resets standard `sysUpTime.0` independently of chassis uptime.
+- Preserve existing Supervisor lifecycle, generated-YAML import, MQTT service resolution, live-interface polling, Juniper VLAN handling and dependency-security behavior.
+
 ## 1.0.7
 
 - Fetch the SNMP2MQTT engine by exact `CORE_COMMIT` instead of by the version tag.

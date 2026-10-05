@@ -20,7 +20,7 @@ grep -q "bashio::services mqtt 'username'" "$RUN"
 grep -q "bashio::services mqtt 'password'" "$RUN"
 grep -q 'SV_MQTT_HOST' "$RUN"
 grep -q 'exec node /app/dist/index.js' "$RUN"
-grep -q '^version: 1.0.7$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^version: 1.0.8$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^schema:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^  mqtt:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -Fq '    host: str?' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
@@ -44,8 +44,8 @@ if grep -Fq '"homeassistant_prefix_requested":' "$RUN"; then
   echo 'Raw custom Home Assistant discovery prefix is still written to diagnostics' >&2
   exit 1
 fi
-grep -q '^ARG CORE_VERSION=v1.0.3$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
-grep -q '^ARG CORE_COMMIT=d8cb67963ce5c8e11988307b934c545fa063f87d$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -q '^ARG CORE_VERSION=v1.0.4$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -q '^ARG CORE_COMMIT=c97041dcfa0a7d974020e7f7450ac8a2f55be3f8$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -Fq 'git init /tmp/snmp2mqtt' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -Fq 'git -C /tmp/snmp2mqtt fetch --depth 1 origin "${CORE_COMMIT}"' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -Fq 'git -C /tmp/snmp2mqtt checkout --detach FETCH_HEAD' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
@@ -61,8 +61,8 @@ if grep -q '^STOPSIGNAL[[:space:]]\+SIGINT$' "$ROOT/switch-vision-snmp2mqtt/Dock
   echo 'Legacy SIGINT Docker stop override remains; Home Assistant must use the default SIGTERM lifecycle.' >&2
   exit 1
 fi
-grep -q 'CORE_VERSION=v1.0.3' "$ROOT/.github/workflows/publish-release.yml"
-grep -q 'CORE_COMMIT=d8cb67963ce5c8e11988307b934c545fa063f87d' "$ROOT/.github/workflows/publish-release.yml"
+grep -q 'CORE_VERSION=v1.0.4' "$ROOT/.github/workflows/publish-release.yml"
+grep -q 'CORE_COMMIT=c97041dcfa0a7d974020e7f7450ac8a2f55be3f8' "$ROOT/.github/workflows/publish-release.yml"
 grep -q '^umask 077$' "$RUN"
 grep -q 'chmod 700 "${IMPORTED_TARGETS_DIR}"' "$RUN"
 grep -q 'chmod 700 "${BACKUP_DIR}"' "$RUN"
