@@ -254,7 +254,11 @@ def validate_dockerfile_contract(root: Path) -> None:
         "FROM node:lts-alpine3.22@sha256:",
         "ARG CORE_VERSION=",
         "ARG CORE_COMMIT=",
+        "git init /tmp/snmp2mqtt",
+        'git -C /tmp/snmp2mqtt fetch --depth 1 origin "${CORE_COMMIT}"',
+        "git -C /tmp/snmp2mqtt checkout --detach FETCH_HEAD",
         'test "${actual_commit}" = "${CORE_COMMIT}"',
+        'test "${actual_version}" = "${CORE_VERSION}"',
         'CMD [ "/run.sh" ]',
     )
     missing = [token for token in required if token not in text]
@@ -262,6 +266,11 @@ def validate_dockerfile_contract(root: Path) -> None:
         raise SystemExit(
             "SNMP2MQTT app Dockerfile release contract missing: "
             + ", ".join(missing)
+        )
+    if 'git clone --branch "${CORE_VERSION}"' in text:
+        raise SystemExit(
+            "SNMP2MQTT app Dockerfile must fetch the exact CORE_COMMIT, "
+            "not use CORE_VERSION as a Git selector"
         )
     print("SNMP2MQTT app Dockerfile release contract: PASS")
 

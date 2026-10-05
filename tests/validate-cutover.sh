@@ -20,7 +20,7 @@ grep -q "bashio::services mqtt 'username'" "$RUN"
 grep -q "bashio::services mqtt 'password'" "$RUN"
 grep -q 'SV_MQTT_HOST' "$RUN"
 grep -q 'exec node /app/dist/index.js' "$RUN"
-grep -q '^version: 1.0.6$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
+grep -q '^version: 1.0.7$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^schema:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -q '^  mqtt:$' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
 grep -Fq '    host: str?' "$ROOT/switch-vision-snmp2mqtt/config.yaml"
@@ -46,6 +46,15 @@ if grep -Fq '"homeassistant_prefix_requested":' "$RUN"; then
 fi
 grep -q '^ARG CORE_VERSION=v1.0.3$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^ARG CORE_COMMIT=d8cb67963ce5c8e11988307b934c545fa063f87d$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -Fq 'git init /tmp/snmp2mqtt' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -Fq 'git -C /tmp/snmp2mqtt fetch --depth 1 origin "${CORE_COMMIT}"' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -Fq 'git -C /tmp/snmp2mqtt checkout --detach FETCH_HEAD' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -Fq 'test "${actual_commit}" = "${CORE_COMMIT}"' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+grep -Fq 'test "${actual_version}" = "${CORE_VERSION}"' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
+if grep -Fq 'git clone --branch "${CORE_VERSION}"' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"; then
+  echo 'HA app still fetches the engine by mutable/tag selector instead of exact CORE_COMMIT' >&2
+  exit 1
+fi
 grep -q '^ARG BUILD_FROM=ghcr.io/home-assistant/base:latest@sha256:94ff231402a5e7ad2a82e261ad5fa4ffae7d7bb095c3febb2edbdf309c9b6aca$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 grep -q '^FROM node:lts-alpine3.22@sha256:191c9f0080fcbbc6547a85dc0ff7988072214a355aabdc1d2ec55a7dae5eea8a AS builder$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"
 if grep -q '^STOPSIGNAL[[:space:]]\+SIGINT$' "$ROOT/switch-vision-snmp2mqtt/Dockerfile"; then

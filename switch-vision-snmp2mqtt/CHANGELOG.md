@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.7
+
+- Fetch the SNMP2MQTT engine by exact `CORE_COMMIT` instead of by the version tag.
+- Verify the fetched commit and package version against `CORE_COMMIT` and `CORE_VERSION` before building.
+- Keep engine runtime bytes unchanged; canonical engine main and the v1.0.3 release tag are tree-identical.
+
 ## 1.0.6
 
 - Rebind the Home Assistant app, Docker build and guarded public publisher to the exact canonical SNMP2MQTT engine `main` identity `d8cb67963ce5c8e11988307b934c545fa063f87d` for engine `v1.0.3`; this merge SHA is tree-identical to the previously audited engine commit, so runtime behavior is unchanged.

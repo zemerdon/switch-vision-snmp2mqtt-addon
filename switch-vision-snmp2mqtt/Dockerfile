@@ -20,10 +20,16 @@ ARG CORE_COMMIT=d8cb67963ce5c8e11988307b934c545fa063f87d
 ARG CACHE_BUST=core-v1.0.3
 
 RUN echo "Cache bust: ${CACHE_BUST}" \
- && git clone --branch "${CORE_VERSION}" --single-branch https://github.com/${SOURCE_REPO}/switch-vision-snmp2mqtt.git /tmp/snmp2mqtt \
+ && git init /tmp/snmp2mqtt \
+ && git -C /tmp/snmp2mqtt remote add origin https://github.com/${SOURCE_REPO}/switch-vision-snmp2mqtt.git \
+ && git -C /tmp/snmp2mqtt fetch --depth 1 origin "${CORE_COMMIT}" \
+ && git -C /tmp/snmp2mqtt checkout --detach FETCH_HEAD \
  && actual_commit="$(git -C /tmp/snmp2mqtt rev-parse HEAD)" \
+ && actual_version="v$(node -p "require('/tmp/snmp2mqtt/package.json').version")" \
  && echo "Core commit: ${actual_commit}" \
+ && echo "Core version: ${actual_version}" \
  && test "${actual_commit}" = "${CORE_COMMIT}" \
+ && test "${actual_version}" = "${CORE_VERSION}" \
  && mkdir -p /app/src \
  && cp /tmp/snmp2mqtt/package.json /app \
  && cp /tmp/snmp2mqtt/yarn.lock /app \
