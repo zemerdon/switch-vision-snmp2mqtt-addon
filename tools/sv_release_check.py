@@ -183,7 +183,7 @@ def validate_engine_coordination(
         root / "switch-vision-snmp2mqtt/README.md"
     ).read_text(encoding="utf-8")
     readme_marker = (
-        f"engine `v{engine_version}` at audited commit "
+        f"engine `v{engine_version}` at reviewed commit "
         f"`{pinned_commit}`"
     )
     if readme_marker not in readme:

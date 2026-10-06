@@ -4,9 +4,9 @@ Home Assistant app wrapper for the Switch Vision SNMP2MQTT polling backend.
 
 ## Core version
 
-This app is pinned to Switch Vision SNMP2MQTT engine `v1.0.4` at audited commit `c97041dcfa0a7d974020e7f7450ac8a2f55be3f8`.
+This app is pinned to Switch Vision SNMP2MQTT engine `v1.0.5` at reviewed commit `7ec0636cc00c6cfc0aabae8e1b2feccee4c09319`.
 
-Engine v1.0.4 keeps the established SNMP polling, live interface resolution, MQTT, transform, Counter64 and shutdown contracts while adding the exact-model Sirivision SR-S25G3420F chassis-uptime source. No local Juniper MIB installation is required at runtime.
+Engine v1.0.5 keeps the established SNMP polling, live interface resolution, MQTT, transform, Counter64, shutdown and Sirivision uptime contracts while adding standards-based Q-BRIDGE VLAN membership derivation for generated Switch Vision targets. No local vendor MIB installation is required at runtime.
 
 ## MQTT service resolution
 

@@ -15,9 +15,9 @@ WORKDIR /app
 
 # Clone
 ARG SOURCE_REPO=zemerdon
-ARG CORE_VERSION=v1.0.4
-ARG CORE_COMMIT=c97041dcfa0a7d974020e7f7450ac8a2f55be3f8
-ARG CACHE_BUST=core-v1.0.4
+ARG CORE_VERSION=v1.0.5
+ARG CORE_COMMIT=7ec0636cc00c6cfc0aabae8e1b2feccee4c09319
+ARG CACHE_BUST=core-v1.0.5
 
 RUN echo "Cache bust: ${CACHE_BUST}" \
  && git init /tmp/snmp2mqtt \

@@ -1,5 +1,11 @@
 # Changelog
 
+## 1.0.9
+
+- Build the Home Assistant app against exact Switch Vision SNMP2MQTT engine `v1.0.5` at canonical commit `7ec0636cc00c6cfc0aabae8e1b2feccee4c09319`.
+- Carry the generic Q-BRIDGE VLAN membership collector needed by Discovery 3.0.21 so supported standards-based switches can publish native, member, tagged and untagged VLAN state without vendor MIB dependencies.
+- Preserve the existing Supervisor lifecycle, generated-YAML import, MQTT, Sirivision uptime and exact engine-pin release contracts.
+
 ## 1.0.8
 
 - Build the Home Assistant app against exact Switch Vision SNMP2MQTT engine `v1.0.4` at canonical commit `c97041dcfa0a7d974020e7f7450ac8a2f55be3f8`.
