@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.10
+
+- Pin the Home Assistant app to reviewed SNMP2MQTT engine v1.0.6 and its exact source commit, reusing the interface-name lookup once per poll without changing device identity, generated YAML or MQTT behavior.
+
 ## 1.0.9
 
 - Build the Home Assistant app against exact Switch Vision SNMP2MQTT engine `v1.0.5` at canonical commit `7ec0636cc00c6cfc0aabae8e1b2feccee4c09319`.
