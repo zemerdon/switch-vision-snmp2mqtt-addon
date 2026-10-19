@@ -1,5 +1,10 @@
 # Changelog
 
+## 1.0.12
+
+- Pin the HA app to reviewed engine 1.0.8, which prepares fixed interface and VLAN candidate names once per target instead of rebuilding them each polling cycle; retain fresh SNMP ifName resolution, EX3300 watcher behavior and MQTT output.
+
+
 ## 1.0.11
 
 - Pin the HA app to reviewed engine 1.0.7, which groups target sensors once at startup rather than repeatedly during polling; preserve existing SNMP and MQTT behavior.
