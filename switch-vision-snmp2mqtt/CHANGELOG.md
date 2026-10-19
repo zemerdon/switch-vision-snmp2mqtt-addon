@@ -1,5 +1,9 @@
 # Changelog
 
+## 1.0.11
+
+- Pin the HA app to reviewed engine 1.0.7, which groups target sensors once at startup rather than repeatedly during polling; preserve existing SNMP and MQTT behavior.
+
 ## 1.0.10
 
 - Pin the Home Assistant app to reviewed SNMP2MQTT engine v1.0.6 and its exact source commit, reusing the interface-name lookup once per poll without changing device identity, generated YAML or MQTT behavior.

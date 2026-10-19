@@ -4,9 +4,9 @@ Home Assistant app wrapper for the Switch Vision SNMP2MQTT polling backend.
 
 ## Core version
 
-This app is pinned to Switch Vision SNMP2MQTT engine `v1.0.6` at reviewed commit `76d0651995880a0b9846be09d5f02b8fe2d3a497`.
+This app is pinned to Switch Vision SNMP2MQTT engine `v1.0.7` at reviewed commit `4232747cadefab7735c4352486978aff0b6b77f6`.
 
-Engine v1.0.6 preserves the established SNMP polling, live-interface resolution, MQTT, transform, Counter64, Q-BRIDGE VLAN, shutdown and Sirivision uptime contracts. Its interface-name table is indexed once per poll for reuse by all interface sensors, without changing candidate priority.
+Engine v1.0.7 preserves SNMP polling, interface/VLAN resolution, MQTT, Counter64, shutdown and Sirivision uptime behavior. It retains the once-per-poll interface-name index and now groups the fixed sensor-source configuration once per target instead of every polling cycle.
 
 ## MQTT service resolution
 
