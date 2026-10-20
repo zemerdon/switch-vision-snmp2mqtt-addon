@@ -2,16 +2,8 @@
 
 ## 1.0.12
 
-- Pin the HA app to reviewed engine 1.0.8, which prepares fixed interface and VLAN candidate names once per target instead of rebuilding them each polling cycle; retain fresh SNMP ifName resolution, EX3300 watcher behavior and MQTT output.
-
-
-## 1.0.11
-
-- Pin the HA app to reviewed engine 1.0.7, which groups target sensors once at startup rather than repeatedly during polling; preserve existing SNMP and MQTT behavior.
-
-## 1.0.10
-
-- Pin the Home Assistant app to reviewed SNMP2MQTT engine v1.0.6 and its exact source commit, reusing the interface-name lookup once per poll without changing device identity, generated YAML or MQTT behavior.
+- Update the HA app to exact reviewed SNMP2MQTT engine 1.0.8. Reuse per-poll interface-name lookups, group target sensors at startup and prepare fixed interface/VLAN candidates once per target instead of repeating equivalent work every poll.
+- Preserve live SNMP resolution, EX3300 watcher transitions, existing generated YAML, MQTT sensor identities and Supervisor lifecycle behavior. No new SNMP operations or hardware capabilities are claimed.
 
 ## 1.0.9
 
